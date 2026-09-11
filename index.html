@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PRICESHOCK — guess which one costs more</title>
+  <meta name="description" content="Two things. One is more expensive. You have no idea which. A game about how absurd prices have become.">
+  <meta name="color-scheme" content="dark">
+
+  <meta property="og:title" content="PRICESHOCK">
+  <meta property="og:description" content="Two things. One costs more. You have no idea which.">
+  <meta property="og:type" content="website">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- Ambient background: two drifting colour blobs + a grid. Purely decorative. -->
+<div class="bg" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="grid"></span>
+</div>
+
+<!-- Flash layer for the reveal. Purely decorative. -->
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<main class="stage">
+
+  <!-- ==================== SCREEN 1: TITLE ==================== -->
+  <section class="screen screen-title is-active" id="screen-title">
+    <h1 class="logo">
+      <span class="logo-price">PRICE</span><span class="logo-shock">SHOCK</span>
+    </h1>
+    <p class="tagline">Two things. One costs more.<br><em>You have no idea which.</em></p>
+
+    <div class="cat-grid" role="list">
+      <button class="cat" role="listitem" data-cat="cars-watches">
+        <span class="cat-icon" aria-hidden="true">🏎️</span>
+        <span class="cat-name">Cars <span class="cat-vs">vs</span> Watches</span>
+        <span class="cat-tag">Four wheels or one wrist</span>
+      </button>
+      <button class="cat" role="listitem" data-cat="luxury">
+        <span class="cat-icon" aria-hidden="true">💎</span>
+        <span class="cat-name">Luxury</span>
+        <span class="cat-tag">Leather, gold and very small bags</span>
+      </button>
+      <button class="cat" role="listitem" data-cat="fashion">
+        <span class="cat-icon" aria-hidden="true">👟</span>
+        <span class="cat-name">Fashion</span>
+        <span class="cat-tag">Everyday things, silly prices</span>
+      </button>
+    </div>
+
+    <p class="hint">10 rounds · tap the one you think costs more</p>
+  </section>
+
+  <!-- ==================== SCREEN 2: GAME ==================== -->
+  <section class="screen screen-game" id="screen-game">
+
+    <header class="hud">
+      <button class="hud-back" id="btn-back" type="button">
+        <span aria-hidden="true">←</span><span class="sr-only">Back to categories</span>
+      </button>
+      <div class="hud-progress">
+        <span class="hud-round" id="hud-round">Round 1 / 10</span>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+      <div class="hud-score">
+        <span class="hud-score-num" id="hud-score">0</span>
+        <span class="hud-streak" id="hud-streak" hidden></span>
+      </div>
+    </header>
+
+    <p class="prompt">Which costs <em>more</em>?</p>
+
+    <div class="arena" id="arena">
+      <!-- Cards are built by app.js so the two sides stay structurally identical. -->
+      <button class="card" id="card-a" type="button" aria-label="Choose left item"></button>
+
+      <div class="versus" aria-hidden="true"><span>VS</span></div>
+
+      <button class="card" id="card-b" type="button" aria-label="Choose right item"></button>
+    </div>
+
+    <!-- Verdict slab: slides up after a choice. -->
+    <div class="verdict" id="verdict" hidden>
+      <div class="verdict-tag" id="verdict-tag"></div>
+      <div class="verdict-multiplier" id="verdict-multiplier"></div>
+      <p class="verdict-line" id="verdict-line"></p>
+      <p class="verdict-fact" id="verdict-fact"></p>
+      <button class="btn btn-next" id="btn-next" type="button">Next round →</button>
+    </div>
+  </section>
+
+  <!-- ==================== SCREEN 3: RESULTS ==================== -->
+  <section class="screen screen-end" id="screen-end">
+    <p class="end-eyebrow" id="end-eyebrow">Final score</p>
+    <div class="end-score"><span id="end-score">0</span><span class="end-of">/ 10</span></div>
+    <h2 class="end-rank" id="end-rank">—</h2>
+    <p class="end-blurb" id="end-blurb"></p>
+
+    <div class="end-actions">
+      <button class="btn btn-primary" id="btn-again" type="button">Play again</button>
+      <button class="btn btn-ghost" id="btn-categories" type="button">Pick another category</button>
+    </div>
+
+    <div class="end-worst" id="end-worst"></div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>
+    Prices are approximate US retail in USD, checked September 2026, and drift constantly.
+    Auction and resale figures are labelled as such. For entertainment — not a valuation.
+  </p>
+  <p class="footer-meta">PRICESHOCK · no trackers, no cookies, no accounts</p>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
