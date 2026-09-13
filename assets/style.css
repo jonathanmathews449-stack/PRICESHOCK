@@ -673,3 +673,35 @@ button { font: inherit; color: inherit; }
   }
   .blob { animation: none; }
 }
+
+/* --- Increased contrast ---------------------------------------------- */
+
+/* Honoured when the reader has asked their OS for more contrast. The text
+   tokens move up to WCAG AAA (7:1) where the base palette targets AA:
+     --muted #cfcade on the card surface [11.69]
+     --faint #aaa3c2 on the card surface  [7.75]
+   But the bigger problem on this page is not the text colour — it is
+   everything painted behind it. Two 60vmax blurred colour blobs and a grid
+   overlay sit under every card, and they are exactly the kind of low-contrast
+   visual noise this preference is asking to be rid of. So the wash is dialled
+   right down and the grid goes entirely, which raises effective contrast
+   everywhere at once without touching a single colour token.
+
+   Placed last in the file so it wins on equal specificity. */
+@media (prefers-contrast: more) {
+  :root {
+    --text:     #ffffff;
+    --muted:    #cfcade;
+    --faint:    #aaa3c2;
+    --border:   rgba(255, 255, 255, 0.3);
+    --border-2: rgba(255, 255, 255, 0.55);
+  }
+
+  .blob { opacity: 0.12; }
+  .grid { display: none; }
+
+  /* Cards need to read as distinct objects, not as a tint on the page. */
+  .card { background: rgba(255, 255, 255, 0.09); }
+  .card.is-loser { background: rgba(255, 255, 255, 0.05); }
+  .versus { border-color: var(--border-2); }
+}
