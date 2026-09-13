@@ -121,7 +121,13 @@
       </div>
     </header>
 
-    <p class="prompt">Which costs <em>more</em>?</p>
+    <!-- An <h2>, not a <p>. Screens are display:none when inactive, so only
+         the active one's headings are exposed — and this screen had none at
+         all, which is where a player spends most of the session. A screen
+         reader navigating by heading found nothing to land on. The .prompt
+         class sets margin, size and weight explicitly, so the tag change is
+         visually identical. -->
+    <h2 class="prompt">Which costs <em>more</em>?</h2>
 
     <div class="arena" id="arena">
       <!-- Cards are built by app.js so the two sides stay structurally identical. -->
