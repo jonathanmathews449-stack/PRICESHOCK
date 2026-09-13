@@ -19,7 +19,7 @@
 
   --text:      #f6f4ff;
   --muted:     #a9a3c0;
-  --faint:     #6f6885;
+  --faint:     #81799a;
 
   /* Overwritten per category by app.js */
   --accent:    #ff4d4d;
@@ -133,6 +133,12 @@ button { font: inherit; color: inherit; }
 
 .screen { display: none; flex: 1; flex-direction: column; }
 .screen.is-active { display: flex; animation: screenIn 420ms var(--ease-out-back) both; }
+/* The screens take focus on navigation (see showScreen in app.js). They are
+   containers, not controls, so no focus ring: a 3px outline round the whole
+   viewport reads as a rendering bug, and a keyboard user is not stranded —
+   the next Tab lands on the first control inside. */
+.screen:focus, .screen:focus-visible { outline: none; }
+
 @keyframes screenIn {
   from { opacity: 0; transform: translateY(14px) scale(0.985); }
   to   { opacity: 1; transform: none; }
@@ -415,7 +421,28 @@ button { font: inherit; color: inherit; }
               0 22px 70px -18px color-mix(in srgb, var(--accent) 75%, transparent);
   transform: scale(1.025);
 }
-.card.is-loser { opacity: 0.55; transform: scale(0.975); }
+/* The losing card recedes, but its text stays fully legible — the price on
+   it is half of what the round is teaching you. Dimming the whole card with
+   opacity used to take every label on it under 2.5:1; even opacity 1 only
+   reaches 4.56:1 for .card-note, so there is no opacity value that both dims
+   and passes AA. The recession is carried by scale, a flatter surface and a
+   desaturated icon instead. */
+.card.is-loser {
+  transform: scale(0.975);
+  background: rgba(255, 255, 255, 0.018);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+.card.is-loser .card-orb { opacity: 0.45; filter: saturate(0.4); }
+.card.is-loser .card-brand { color: var(--muted); }
+
+/* The winner card's ground is accent-tinted, and how light that tint lands
+   depends on which category is playing (app.js rewrites --accent). --faint
+   measures 3.74-3.97:1 on it across the three categories — under AA in all
+   three — so the note steps up to --muted, which clears 6.3:1 on every one.
+   Do not "unify" this back to --faint: there is no single faint value that
+   passes on both the plain card and every accent tint. */
+.card.is-winner .card-note { color: var(--muted); }
+
 
 .card.is-picked-right { animation: popRight 560ms var(--ease-out-back); }
 .card.is-picked-wrong { animation: shakeWrong 480ms ease-in-out; }
@@ -494,8 +521,11 @@ button { font: inherit; color: inherit; }
   border-radius: 999px;
   margin-bottom: 0.7rem;
 }
-.verdict-tag.is-right { background: color-mix(in srgb, var(--win) 18%, transparent); color: var(--win); }
-.verdict-tag.is-wrong { background: color-mix(in srgb, var(--lose) 18%, transparent); color: var(--lose); }
+/* 12%, not 18%: the tag is 11.5px uppercase mono, so it needs AA at 4.5:1,
+   and an 18% tint of --lose lifted its own background until the text on it
+   measured 4.42:1. At 12% it is 4.79:1, and the win tag 8.71:1. */
+.verdict-tag.is-right { background: color-mix(in srgb, var(--win) 12%, transparent); color: var(--win); }
+.verdict-tag.is-wrong { background: color-mix(in srgb, var(--lose) 12%, transparent); color: var(--lose); }
 
 .verdict-multiplier {
   font-size: clamp(2.2rem, 9vw, 4.6rem);

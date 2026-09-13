@@ -45,6 +45,7 @@
     endBlurb: document.getElementById("end-blurb"),
     endWorst: document.getElementById("end-worst"),
     endEyebrow: document.getElementById("end-eyebrow"),
+    live: document.getElementById("live-status"),
   };
 
   var state = {
@@ -80,11 +81,19 @@
     return ratio.toFixed(1).replace(/\.0$/, "") + "×";
   }
 
+  // Swapping screens is a navigation, so focus has to go with it. Without this,
+  // pressing "See results" hides the button that had focus and drops the
+  // keyboard caret back to <body> — the results never get announced and the
+  // next Tab starts from the top of the document. Each screen carries
+  // tabindex="-1" so it can receive focus without entering the tab order.
   function showScreen(name) {
     Object.keys(el.screens).forEach(function (k) {
       el.screens[k].classList.toggle("is-active", k === name);
     });
     window.scrollTo({ top: 0, behavior: "auto" });
+
+    var active = el.screens[name];
+    if (active && typeof active.focus === "function") active.focus();
   }
 
   /* ------------------------------------------------------------- render */
@@ -153,6 +162,16 @@
       }
     }
     requestAnimationFrame(frame);
+  }
+
+  // The reveal is carried entirely by colour, glow and motion. This writes the
+  // same outcome as plain text into the live region, which is the only way a
+  // screen-reader user learns it. Called from settle() and never earlier:
+  // announcing during the count-up would read the answer out before the
+  // reveal lands.
+  function announce(msg) {
+    if (!el.live) return;
+    el.live.textContent = msg;
   }
 
   function fireFlash() {
@@ -242,6 +261,16 @@
       el.btnNext.textContent =
         state.index + 1 >= ROUND_COUNT ? "See results →" : "Next round →";
       el.progress.style.width = ((state.index + 1) / ROUND_COUNT) * 100 + "%";
+
+      var loseIt = loserItem(round);
+      announce(
+        (correct ? "Correct. " : "Wrong. ") +
+        winItem.brand + " " + winItem.name + ", " + money(hi) + ", costs " +
+        formatMultiplier(ratio) + " more than " +
+        loseIt.brand + " " + loseIt.name + ", " + money(lo) + ". " +
+        "Score " + state.score + " of " + (state.index + 1) + "."
+      );
+
     }
   }
 

@@ -6,10 +6,29 @@
   <title>PRICESHOCK — guess which one costs more</title>
   <meta name="description" content="Two things. One is more expensive. You have no idea which. A game about how absurd prices have become.">
   <meta name="color-scheme" content="dark">
+  <!-- One value, not two: this page is dark in every theme by design. -->
+  <meta name="theme-color" content="#08070c">
+
+  <!-- The trailing slash matters: GitHub Pages serves this page at the
+       directory URL, and a canonical without it points at a 301. -->
+  <link rel="canonical" href="https://jonathanmathews449-stack.github.io/PRICESHOCK/">
 
   <meta property="og:title" content="PRICESHOCK">
   <meta property="og:description" content="Two things. One costs more. You have no idea which.">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PRICESHOCK">
+  <meta property="og:url" content="https://jonathanmathews449-stack.github.io/PRICESHOCK/">
+
+  <!-- og:image must be a raster file and an absolute URL. Every platform
+       ignores an SVG here, and several refuse a relative path, so the
+       favicon's inline-SVG trick does not transfer. Built from
+       og-source.html by scripts/og-image.sh; the dimensions are declared so
+       the card reserves the right space before the image arrives. -->
+  <meta property="og:image" content="https://jonathanmathews449-stack.github.io/PRICESHOCK/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PRICESHOCK — two things, one costs more. A Lamborghini Huracán at $215,000 against a Richard Mille RM 27-04 Tourbillon at $1,000,050.">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
   <link rel="stylesheet" href="assets/style.css">
@@ -26,27 +45,35 @@
 <!-- Flash layer for the reveal. Purely decorative. -->
 <div class="flash" id="flash" aria-hidden="true"></div>
 
+<!-- The reveal is visual: a glow, a slam, a dimmed card. This live region is
+     the same information as text, and it is the only way a screen-reader user
+     learns the outcome of a round. Written by app.js on every reveal. -->
+<p class="sr-only" id="live-status" role="status" aria-live="polite"></p>
+
 <main class="stage">
 
   <!-- ==================== SCREEN 1: TITLE ==================== -->
-  <section class="screen screen-title is-active" id="screen-title">
+  <section class="screen screen-title is-active" id="screen-title" tabindex="-1">
     <h1 class="logo">
       <span class="logo-price">PRICE</span><span class="logo-shock">SHOCK</span>
     </h1>
     <p class="tagline">Two things. One costs more.<br><em>You have no idea which.</em></p>
 
-    <div class="cat-grid" role="list">
-      <button class="cat" role="listitem" data-cat="cars-watches">
+    <!-- role="group", not role="list": on a <button> REPLACES the
+         button role, so a screen reader announced these three as list items and
+         never said they were activatable. -->
+    <div class="cat-grid" role="group" aria-label="Choose a category">
+      <button class="cat" data-cat="cars-watches">
         <span class="cat-icon" aria-hidden="true">🏎️</span>
         <span class="cat-name">Cars <span class="cat-vs">vs</span> Watches</span>
         <span class="cat-tag">Four wheels or one wrist</span>
       </button>
-      <button class="cat" role="listitem" data-cat="luxury">
+      <button class="cat" data-cat="luxury">
         <span class="cat-icon" aria-hidden="true">💎</span>
         <span class="cat-name">Luxury</span>
         <span class="cat-tag">Leather, gold and very small bags</span>
       </button>
-      <button class="cat" role="listitem" data-cat="fashion">
+      <button class="cat" data-cat="fashion">
         <span class="cat-icon" aria-hidden="true">👟</span>
         <span class="cat-name">Fashion</span>
         <span class="cat-tag">Everyday things, silly prices</span>
@@ -57,7 +84,7 @@
   </section>
 
   <!-- ==================== SCREEN 2: GAME ==================== -->
-  <section class="screen screen-game" id="screen-game">
+  <section class="screen screen-game" id="screen-game" tabindex="-1">
 
     <header class="hud">
       <button class="hud-back" id="btn-back" type="button">
@@ -95,7 +122,7 @@
   </section>
 
   <!-- ==================== SCREEN 3: RESULTS ==================== -->
-  <section class="screen screen-end" id="screen-end">
+  <section class="screen screen-end" id="screen-end" tabindex="-1">
     <p class="end-eyebrow" id="end-eyebrow">Final score</p>
     <div class="end-score"><span id="end-score">0</span><span class="end-of">/ 10</span></div>
     <h2 class="end-rank" id="end-rank">—</h2>

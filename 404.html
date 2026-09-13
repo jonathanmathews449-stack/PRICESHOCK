@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not found — PRICESHOCK</title>
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08070c">
+  <meta name="robots" content="noindex">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+
+  <!--
+    Styles are inlined rather than linked, on purpose.
+
+    GitHub Pages serves this file for ANY missing path under the site,
+    including deep ones like /PRICESHOCK/a/b/c. A relative <link> would
+    resolve against that path and 404 too, leaving an unstyled page exactly
+    when something has already gone wrong. Inlining makes the page correct at
+    every depth, and it is small enough that the extra bytes are free.
+
+    The tokens are copied from assets/style.css, cars-watches accents. They
+    are only the handful this page uses; if the palette there changes, this
+    follows by hand.
+  -->
+  <style>
+    :root {
+      --bg:       #08070c;
+      --text:     #f6f4ff;
+      --muted:    #a9a3c0;
+      --faint:    #81799a;
+      --accent:   #ff4d4d;
+      --accent-2: #ffb03a;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+              "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+              "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 2rem 1.25rem;
+      background: var(--bg);
+      background-image:
+        radial-gradient(60rem 40rem at 15% -10%, rgba(255, 77, 77, 0.22), transparent 68%),
+        radial-gradient(52rem 38rem at 88% 110%, rgba(255, 176, 58, 0.16), transparent 68%);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 33rem; text-align: center; }
+
+    .code {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin: 0 0 1rem;
+    }
+    h1 {
+      font-size: clamp(2.4rem, 11vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.045em;
+      line-height: 1;
+      margin: 0 0 1rem;
+      background: linear-gradient(100deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    p { margin: 0 0 1.1rem; color: var(--muted); font-size: 1.05rem; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 1.4rem;
+      padding: 0.8rem 1.6rem;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(100deg, var(--accent), var(--accent-2));
+      color: #12101a;
+      font-size: 1rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    :focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
+  </style>
+</head>
+<body>
+
+<main>
+  <p class="code">Error 404</p>
+  <h1>$0.00</h1>
+  <p>
+    Nothing here, and nothing to guess. This page does not exist — the link
+    that brought you here is mistyped or out of date.
+  </p>
+  <a class="btn" href="/PRICESHOCK/">Play a round instead</a>
+</main>
+
+</body>
+</html>
