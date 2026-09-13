@@ -213,6 +213,21 @@ button { font: inherit; color: inherit; }
 .cat-vs { color: var(--accent); font-style: italic; }
 .cat-tag { font-size: 0.84rem; color: var(--faint); }
 
+/* Shown only inside <noscript> in index.html, where the category buttons are
+   hidden because nothing would happen if they were pressed. --muted on --bg
+   measures 7.7:1, so it is readable as body copy rather than as fine print. */
+.noscript-note {
+  max-width: 34rem;
+  margin: 1.4rem auto 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
 .hint {
   margin-top: 2.2rem;
   font-family: var(--mono);

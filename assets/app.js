@@ -133,6 +133,18 @@
     el.round.textContent = "Round " + (state.index + 1) + " / " + ROUND_COUNT;
     el.progress.style.width = (state.index / ROUND_COUNT) * 100 + "%";
     state.locked = false;
+
+    // Hiding the verdict destroys the focus that was on its Next button, so
+    // without this a keyboard user landed back on <body> at the start of
+    // every round and had to tab in again. Focus the left card: its
+    // aria-label was just rewritten to "Choose <brand> <name>", so it states
+    // both what this control does and what is on offer.
+    //
+    // Together with the move to Next in settle(), this closes the loop —
+    // category, card, next, card, next — with focus never dropped. Both
+    // moves only ever reclaim focus from an element that is being disabled
+    // or hidden; neither takes it from something the user could still use.
+    el.cardA.focus();
   }
 
   /* ------------------------------------------------------------- reveal */
@@ -261,6 +273,18 @@
       el.btnNext.textContent =
         state.index + 1 >= ROUND_COUNT ? "See results →" : "Next round →";
       el.progress.style.width = ((state.index + 1) / ROUND_COUNT) * 100 + "%";
+
+      // Choosing a card disables it, which destroys the focus a keyboard
+      // user was holding — focus fell to <body>, so continuing meant tabbing
+      // from the top of the document, and the first stop was the back button:
+      // one stray Enter and the run was abandoned. Move focus to the action
+      // that is actually next. This restores focus rather than stealing it,
+      // since the element that had it no longer accepts any.
+      //
+      // Before announce(), deliberately: a focus change can cut off an
+      // in-flight polite announcement, so the move happens first and the
+      // outcome is spoken after it.
+      el.btnNext.focus();
 
       var loseIt = loserItem(round);
       announce(

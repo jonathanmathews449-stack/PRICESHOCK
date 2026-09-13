@@ -59,21 +59,23 @@
     </h1>
     <p class="tagline">Two things. One costs more.<br><em>You have no idea which.</em></p>
 
-    <!-- role="group", not role="list": on a <button> REPLACES the
-         button role, so a screen reader announced these three as list items and
-         never said they were activatable. -->
+    <!-- role="group", not role="list". An explicit ARIA role REPLACES the
+         implicit one, so role="listitem" on these buttons meant a screen
+         reader announced three list items and never said they could be
+         activated at all. Do not put list roles back on interactive
+         elements; if these ever need list semantics, nest real <li>s. -->
     <div class="cat-grid" role="group" aria-label="Choose a category">
-      <button class="cat" data-cat="cars-watches">
+      <button class="cat" type="button" data-cat="cars-watches">
         <span class="cat-icon" aria-hidden="true">🏎️</span>
         <span class="cat-name">Cars <span class="cat-vs">vs</span> Watches</span>
         <span class="cat-tag">Four wheels or one wrist</span>
       </button>
-      <button class="cat" data-cat="luxury">
+      <button class="cat" type="button" data-cat="luxury">
         <span class="cat-icon" aria-hidden="true">💎</span>
         <span class="cat-name">Luxury</span>
         <span class="cat-tag">Leather, gold and very small bags</span>
       </button>
-      <button class="cat" data-cat="fashion">
+      <button class="cat" type="button" data-cat="fashion">
         <span class="cat-icon" aria-hidden="true">👟</span>
         <span class="cat-name">Fashion</span>
         <span class="cat-tag">Everyday things, silly prices</span>
@@ -81,6 +83,25 @@
     </div>
 
     <p class="hint">10 rounds · tap the one you think costs more</p>
+
+    <!--
+      Unlike Named After, this one genuinely cannot degrade: the rounds, the
+      count-up and the whole reveal are the product, and they are all script.
+      Without JS the title screen still rendered, but the three category
+      buttons were dead — they looked pressable and did nothing, which is a
+      worse experience than being told the truth. So say it plainly and take
+      the dead controls away.
+    -->
+    <noscript>
+      <style>
+        .cat-grid, .hint { display: none; }
+      </style>
+      <p class="noscript-note">
+        PRICESHOCK is a game, and the rounds run in your browser — so it needs
+        JavaScript switched on. There are no trackers, no cookies and no
+        accounts either way.
+      </p>
+    </noscript>
   </section>
 
   <!-- ==================== SCREEN 2: GAME ==================== -->
