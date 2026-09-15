@@ -394,6 +394,19 @@
 
   /* ---------------------------------------------------------------- flow */
 
+  // Randomized has no ROUNDS entry; its pool is every other category's pairs,
+  // gathered at the moment you press it. Built rather than stored so it cannot
+  // fall out of step with the catalogue, and because `shuffle` then draws a
+  // different ten every run — which is the whole point of the category.
+  function poolFor(id) {
+    if (id !== "random") return ROUNDS[id];
+    var pool = [];
+    Object.keys(ROUNDS).forEach(function (key) {
+      pool = pool.concat(ROUNDS[key]);
+    });
+    return pool;
+  }
+
   function startCategory(id) {
     var cat = CATEGORIES.filter(function (c) { return c.id === id; })[0];
     if (!cat) return;
@@ -410,7 +423,7 @@
     state.biggestShock = null;
 
     // Randomise which side each item lands on, so position carries no signal.
-    state.rounds = shuffle(ROUNDS[id]).slice(0, ROUND_COUNT).map(function (r) {
+    state.rounds = shuffle(poolFor(id)).slice(0, ROUND_COUNT).map(function (r) {
       var flip = Math.random() < 0.5;
       return {
         left: flip ? r.b : r.a,

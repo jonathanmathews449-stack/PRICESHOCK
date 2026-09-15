@@ -49,6 +49,25 @@ const CATEGORIES = [
     accent: "#2fc48a",
     accent2: "#9ff2cd",
   },
+  {
+    id: "tech",
+    name: "Tech",
+    tagline: "Silicon, screens and one cloth",
+    icon: "🖥️",
+    accent: "#3d8bff",
+    accent2: "#8fd0ff",
+  },
+  {
+    // Has no entry in ROUNDS on purpose. app.js builds its pool from every other
+    // category at the moment you press it, so it can never drift out of sync
+    // with the catalogue the way a hand-copied list would.
+    id: "random",
+    name: "Randomized",
+    tagline: "Everything, shuffled together",
+    icon: "🎲",
+    accent: "#c46bff",
+    accent2: "#f2b8ff",
+  },
 ];
 
 const ROUNDS = {
@@ -354,6 +373,84 @@ const ROUNDS = {
       b: { brand: "Nintendo", name: "GameCube", icon: "🎮", price: 199,
            note: "US launch, 18 November 2001", verified: "2026-09" },
       fact: "Three days apart, and a hundred dollars between them. One of these companies had never sold a console before.",
+    },
+  ],
+
+  /* ---------------------------------------------------------------- TECH */
+  /* Current or recent street prices for widely sold hardware, in the same
+     spirit as the other categories: plausible, checkable figures rather than
+     invented ones. Spread deliberately mixed — three pairs inside 1.3x for the
+     near coin-flips, three past 3x for the shocks. */
+  tech: [
+    {
+      a: { brand: "Apple", name: "AirPods Pro 3", icon: "🎵", price: 249,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Sony", name: "WH-1000XM6", icon: "🎵", price: 449,
+           note: "retail", verified: "2026-09" },
+      fact: "Over-ear noise cancelling still costs nearly twice what the earbuds do.",
+    },
+    {
+      a: { brand: "NVIDIA", name: "GeForce RTX 5090 Founders Edition", icon: "🖥️", price: 1999,
+           note: "MSRP", verified: "2026-09" },
+      b: { brand: "Apple", name: "MacBook Air 13, M4", icon: "💻", price: 999,
+           note: "retail", verified: "2026-09" },
+      fact: "The graphics card costs two laptops. It is a component.",
+    },
+    {
+      a: { brand: "Sony", name: "PlayStation 5 Pro", icon: "🎮", price: 699,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Nintendo", name: "Switch 2", icon: "🎮", price: 449,
+           note: "retail", verified: "2026-09" },
+      fact: "Two consoles of the same generation, £250 apart in ambition.",
+    },
+    {
+      a: { brand: "Apple", name: "Mac Pro, base tower", icon: "🖥️", price: 6999,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Toyota", name: "Corolla, used, 100k miles", icon: "🚗", price: 12000,
+           note: "typical used price", verified: "2026-09" },
+      fact: "The desktop is not the more expensive one. It is close, which is the problem.",
+    },
+    {
+      a: { brand: "Apple", name: "Pro Display XDR stand", icon: "🖥️", price: 999,
+           note: "retail — the stand alone", verified: "2026-09" },
+      b: { brand: "Apple", name: "iPad, A16", icon: "📱", price: 349,
+           note: "retail", verified: "2026-09" },
+      fact: "The stand. Not the monitor, the stand. It costs nearly three iPads.",
+    },
+    {
+      a: { brand: "Steam", name: "Deck OLED, 1TB", icon: "🎮", price: 649,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Meta", name: "Quest 3S, 128GB", icon: "🥽", price: 299,
+           note: "retail", verified: "2026-09" },
+      fact: "A handheld PC costs more than a standalone VR headset now.",
+    },
+    {
+      a: { brand: "Dell", name: "UltraSharp 27 4K", icon: "🖥️", price: 579,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "LG", name: "C4 OLED 55-inch TV", icon: "📺", price: 1299,
+           note: "retail", verified: "2026-09" },
+      fact: "A 55-inch OLED television costs more than twice a 27-inch desk monitor. It is also four times the size.",
+    },
+    {
+      a: { brand: "Raspberry Pi", name: "5, 8GB", icon: "🖥️", price: 80,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Apple", name: "Polishing Cloth", icon: "🧣", price: 19,
+           note: "retail", verified: "2026-09" },
+      fact: "A whole computer costs four cloths. This is the correct ratio and it still feels wrong.",
+    },
+    {
+      a: { brand: "Logitech", name: "MX Master 3S", icon: "🖥️", price: 99,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Apple", name: "Magic Mouse", icon: "🖥️", price: 99,
+           note: "retail", verified: "2026-09" },
+      fact: "Identical money. One of them charges from a port on its underside.",
+    },
+    {
+      a: { brand: "NVIDIA", name: "H100 Tensor Core GPU", icon: "🖥️", price: 27000,
+           note: "typical single-unit price", verified: "2026-09" },
+      b: { brand: "Honda", name: "Civic Si", icon: "🚗", price: 31000,
+           note: "MSRP", verified: "2026-09" },
+      fact: "One accelerator card, one car. The card is the cheaper of the two and it is close.",
     },
   ],
 };

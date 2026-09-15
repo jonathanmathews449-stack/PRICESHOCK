@@ -789,3 +789,21 @@ button { font: inherit; color: inherit; }
 /* The winner's orb already lifts; give its photo the same lift rather than
    leaving the picture flat inside a card that is moving. */
 .card.is-winner .card-orb.has-photo { box-shadow: inset 0 0 0 2px var(--accent-2); }
+
+/* --- Pick a category ------------------------------------------------- */
+
+/* A real <h2>, not a styled <p>. The category grid is the page's main choice
+   and had no heading at all, so a screen reader arriving by heading found the
+   title and then nothing until the game started. It also labels the grid. */
+.pick-a-category {
+  margin: 2.2rem 0 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* Randomized spans the row it lands on: it is not one of the themed categories,
+   it is the way in when you do not want to choose. */
+.cat-wide { grid-column: 1 / -1; }
