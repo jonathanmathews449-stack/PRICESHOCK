@@ -369,6 +369,22 @@ button { font: inherit; color: inherit; }
   flex: 0 0 auto;
 }
 
+/* The drawn product art inside the orb. Stroked with currentColor so it picks
+   up the category accent that already tints the orb, and sized in % so it
+   tracks the orb's own clamp() rather than needing a second one. */
+.card-art {
+  width: 56%;
+  height: 56%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.95;
+}
+.card-orb { color: var(--text); }
+.card.is-winner .card-orb { color: var(--accent-2); }
+
 /* card-body is a <span>, so it must be told to stack — otherwise brand and
    name run together on one line. */
 .card-body {

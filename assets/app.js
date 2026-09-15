@@ -114,7 +114,7 @@
   function cardMarkup(item) {
     return (
       '<span class="card-pick">your pick</span>' +
-      '<span class="card-orb" aria-hidden="true">' + item.icon + "</span>" +
+      '<span class="card-orb" aria-hidden="true"><svg class="card-art" viewBox="0 0 24 24" aria-hidden="true"><use href="#art-' + artFor(item) + '"/></svg></span>' +
       '<span class="card-body">' +
         '<span class="card-brand">' + item.brand + "</span>" +
         '<span class="card-name">' + item.name + "</span>" +
@@ -164,6 +164,43 @@
 
   // Counts an element from 0 to `target`. Both cards are given the same
   // duration so the cheaper one doesn't finish first and spoil the reveal.
+  // Item art. Every item already carries an emoji, so the emoji is the key —
+  // a new item gets art for free, and nothing has to be edited into data.js.
+  // Items map to the NEAREST symbol, not an exact one: a Submariner and a
+  // Speedmaster are both `watch`, a 911 and a Camry are both `car`.
+  var ART = {
+    "⌚": "watch", "🏎️": "supercar", "🚗": "car", "🚙": "car",
+    "👟": "sneaker", "🥾": "boot", "🩴": "sandal", "👞": "dressShoe",
+    "👜": "handbag", "👛": "handbag", "🧳": "luggage",
+    "🧥": "coat", "🧣": "scarf", "👕": "tshirt", "👔": "shirt", "👖": "jeans",
+    "🕶️": "sunglasses", "💍": "ring", "💎": "gem", "💛": "bracelet",
+    "🍾": "bottle", "💨": "styler",
+    "📱": "phone", "📟": "phone", "💻": "laptop", "🖥️": "desktop",
+    "⌨️": "keyboard", "📺": "tv", "🎮": "controller", "🕹️": "controller",
+    "🥽": "vr", "📝": "pda", "🖋️": "pen", "🎵": "musicPlayer",
+    "🛵": "scooter", "🛴": "scooter", "🚲": "bicycle",
+  };
+
+  function artFor(item) {
+    return ART[item.icon] || "gem";   // `gem` is the never-blank fallback
+  }
+
+  // A missing symbol renders an empty orb and nothing throws, so the failure is
+  // silent and only visible if you happen to look at that one card. Check the
+  // whole dataset once, at load, and say so loudly.
+  (function verifyArt() {
+    var missing = [];
+    Object.keys(ROUNDS).forEach(function (cat) {
+      ROUNDS[cat].forEach(function (round) {
+        [round.a, round.b].forEach(function (item) {
+          if (!ART[item.icon]) missing.push(cat + ": " + item.brand + " " + item.name + " (" + item.icon + ")");
+          else if (!document.getElementById("art-" + ART[item.icon])) missing.push("no symbol #art-" + ART[item.icon]);
+        });
+      });
+    });
+    if (missing.length) console.error("PRICESHOCK: items without art:", missing);
+  })();
+
   function countUp(node, target, done) {
     var start = performance.now();
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
