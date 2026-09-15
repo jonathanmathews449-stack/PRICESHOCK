@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PRICESHOCK â€” product photograph manifest
+   PRICESHOCK — product photograph manifest
    --------------------------------------------------------------------------
    GENERATED. Do not hand-edit; it is written from what actually downloaded, so
    it can never name a file that is missing from assets/photos/.
