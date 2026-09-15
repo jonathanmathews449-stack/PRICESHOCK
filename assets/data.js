@@ -439,11 +439,11 @@ const ROUNDS = {
       fact: "A whole computer costs four cloths. This is the correct ratio and it still feels wrong.",
     },
     {
-      a: { brand: "Logitech", name: "MX Master 3S", icon: "🖥️", price: 99,
+      a: { brand: "Logitech", name: "MX Master 3S", icon: "🖥️", price: 119,
            note: "retail", verified: "2026-09" },
       b: { brand: "Apple", name: "Magic Mouse", icon: "🖥️", price: 99,
            note: "retail", verified: "2026-09" },
-      fact: "Identical money. One of them charges from a port on its underside.",
+      fact: "Twenty dollars apart. Only one of them charges from a port on its underside.",
     },
     {
       a: { brand: "NVIDIA", name: "H100 Tensor Core GPU", icon: "🖥️", price: 27000,

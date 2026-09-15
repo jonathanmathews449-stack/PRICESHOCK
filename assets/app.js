@@ -223,27 +223,45 @@
     if (missing.length) console.error("PRICESHOCK: items without art:", missing);
   })();
 
+  // Anything mid-count registers a finisher here, so a skip can land on exactly
+  // the state the animation would have reached — same text, same callbacks, same
+  // order — rather than on a second, slightly different code path.
+  var pendingFinishers = [];
+
+  function skipReveal() {
+    if (!pendingFinishers.length) return false;
+    var list = pendingFinishers;
+    pendingFinishers = [];
+    list.forEach(function (finish) { finish(); });
+    return true;
+  }
+
   function countUp(node, target, done) {
     var start = performance.now();
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var settled = false;
 
-    if (reduce) {
+    // Guarded, because a skip and the last frame can both arrive: whichever is
+    // first wins and the other becomes a no-op. Without this, `onDone` counts
+    // twice and settle() runs on a half-revealed round.
+    function finish() {
+      if (settled) return;
+      settled = true;
       node.textContent = money(target);
       if (done) done();
-      return;
     }
 
+    pendingFinishers.push(finish);
+    if (reduce) { finish(); return; }
+
     function frame(now) {
+      if (settled) return;        // skipped out from under us
       var t = Math.min((now - start) / COUNT_MS, 1);
       // easeOutExpo — fast at first, long tail. Feels like a slot machine.
       var eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
       node.textContent = money(target * eased);
-      if (t < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        node.textContent = money(target);
-        if (done) done();
-      }
+      if (t < 1) requestAnimationFrame(frame);
+      else finish();
     }
     requestAnimationFrame(frame);
   }
@@ -283,6 +301,7 @@
     var loser = winner === pickedCard ? otherCard : pickedCard;
 
     // Reveal both prices simultaneously.
+    pendingFinishers = [];   // nothing from a previous round may leak into this one
     var finished = 0;
     function onDone() {
       finished += 1;
@@ -465,10 +484,17 @@
     var r = RANKS.filter(function (x) { return state.score >= x.min; })[0];
     el.endRank.textContent = r.rank;
     el.endBlurb.textContent = r.blurb;
-    el.endEyebrow.textContent = "Final score";
-    el.endTally.textContent =
-      state.score + " of " + ROUND_COUNT + " correct" +
-      (state.bestStreak >= 2 ? " · best streak " + state.bestStreak + " in a row" : "");
+    // Ten out of ten is the only score that deserves its own reading of the
+    // screen, so it gets the eyebrow, a class to style against, and the flash
+    // the game otherwise saves for a genuine price shock.
+    var perfect = state.score === ROUND_COUNT;
+    el.screens.end.classList.toggle("is-perfect", perfect);
+    el.endEyebrow.textContent = perfect ? "Perfect run" : "Final score";
+    el.endTally.textContent = perfect
+      ? ROUND_COUNT + " of " + ROUND_COUNT + " correct. Not one wrong."
+      : state.score + " of " + ROUND_COUNT + " correct" +
+        (state.bestStreak >= 2 ? " · best streak " + state.bestStreak + " in a row" : "");
+    if (perfect) fireFlash();
 
     if (state.biggestShock) {
       var s = state.biggestShock;
@@ -501,10 +527,18 @@
   // without a mouse and is genuinely faster.
   document.addEventListener("keydown", function (e) {
     if (!el.screens.game.classList.contains("is-active")) return;
+    // Space during the count-up finishes it. Checked before the Enter/Space
+    // advance below, because during a reveal the verdict is still hidden and
+    // that branch cannot fire anyway — this is the only thing Space can mean.
+    if ((e.key === " " || e.key === "Enter") && skipReveal()) { e.preventDefault(); return; }
     if (e.key === "ArrowLeft" && !state.locked) { e.preventDefault(); choose("left"); }
     else if (e.key === "ArrowRight" && !state.locked) { e.preventDefault(); choose("right"); }
     else if ((e.key === "Enter" || e.key === " ") && state.locked && !el.verdict.hidden) {
       e.preventDefault(); nextRound();
     }
   });
+
+  // A click anywhere finishes the count-up too. It only ever does anything while
+  // a reveal is in flight, so it can never steal a click from a control.
+  document.addEventListener("click", function () { skipReveal(); }, true);
 })();

@@ -355,8 +355,11 @@ button { font: inherit; color: inherit; }
 .card:hover:not(.is-revealed)::before { transform: translateX(100%); }
 
 .card-orb {
-  width: clamp(4.2rem, 11vw, 6.2rem);
-  height: clamp(4.2rem, 11vw, 6.2rem);
+  /* Sized when the orb held one emoji. Now it holds a photograph, so it scales
+     with the viewport and gets materially bigger on a large screen — vmin, not
+     vw, so a short landscape window cannot push the cards off the bottom. */
+  width: clamp(5.5rem, 20vmin, 13rem);
+  height: clamp(5.5rem, 20vmin, 13rem);
   display: grid; place-items: center;
   font-size: clamp(2rem, 5.5vw, 3rem);
   border-radius: 50%;
@@ -703,7 +706,7 @@ button { font: inherit; color: inherit; }
     margin: -0.15rem 0;
   }
   .card { flex-direction: row; align-items: center; text-align: left; gap: 0.9rem; padding: 1rem 1.1rem; }
-  .card-orb { margin-bottom: 0; width: 3.2rem; height: 3.2rem; font-size: 1.6rem; }
+  .card-orb { margin-bottom: 0; width: clamp(3.6rem, 18vw, 5.4rem); height: clamp(3.6rem, 18vw, 5.4rem); font-size: 1.6rem; }
   .card-body { flex: 1; align-items: flex-start; text-align: left; }
   .card-figures {
     margin-top: 0;
@@ -807,3 +810,19 @@ button { font: inherit; color: inherit; }
 /* Randomized spans the row it lands on: it is not one of the themed categories,
    it is the way in when you do not want to choose. */
 .cat-wide { grid-column: 1 / -1; }
+
+/* --- A perfect run --------------------------------------------------- */
+
+/* Ten from ten. The score itself carries the celebration rather than any new
+   furniture: it takes the accent gradient the winner cards use, and the eyebrow
+   above it stops being a label and becomes the announcement. */
+.screen-end.is-perfect .end-eyebrow {
+  color: var(--accent-2);
+  font-weight: 800;
+}
+.screen-end.is-perfect .end-score {
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.screen-end.is-perfect .end-tally { color: var(--accent-2); }
