@@ -41,6 +41,14 @@ const CATEGORIES = [
     accent: "#7b6cff",
     accent2: "#38e8ff",
   },
+  {
+    id: "launch-prices",
+    name: "Launch Prices",
+    tagline: "What it cost on day one",
+    icon: "📟",
+    accent: "#2fc48a",
+    accent2: "#9ff2cd",
+  },
 ];
 
 const ROUNDS = {
@@ -263,6 +271,89 @@ const ROUNDS = {
       b: { brand: "Timberland", name: "6-Inch Premium boot", icon: "🥾", price: 208,
            note: "approx. retail", verified: "2026-09" },
       fact: "The Docs were invented by a German army doctor recovering from a skiing injury.",
+    },
+  ],
+
+  /* ------------------------------------------------------- LAUNCH PRICES */
+  /* Every figure here is the price on the day the thing went on sale, in the
+     dollars of that year — not adjusted for inflation, because the game is a
+     comparison between two numbers and adjusting one would make it a
+     comparison between two different things. `note` always carries the year,
+     so nothing is being smuggled past the reader.
+
+     Where a price had cents, the exact figure is in `note`: the display
+     rounds, and $699.99 shown as "$700" would be a small lie in a game whose
+     whole footing is that its numbers are checkable. */
+  "launch-prices": [
+    {
+      a: { brand: "Apple", name: "Macintosh 128K", icon: "🖥️", price: 2495,
+           note: "launch price, January 1984", verified: "2026-09" },
+      b: { brand: "Motorola", name: "DynaTAC 8000X", icon: "📱", price: 3995,
+           note: "launch price, 1984", verified: "2026-09" },
+      fact: "The same year. The telephone cost more than the computer, and the telephone could only make telephone calls.",
+    },
+    {
+      a: { brand: "Apple", name: "Lisa", icon: "🖥️", price: 9995,
+           note: "base price at launch, January 1983", verified: "2026-09" },
+      b: { brand: "Segway", name: "Human Transporter", icon: "🛴", price: 5000,
+           note: "price at launch, 2001", verified: "2026-09" },
+      fact: "Two of the most confidently launched products in the business, eighteen years apart. The Lisa was twice the price.",
+    },
+    {
+      a: { brand: "IBM", name: "Personal Computer 5150", icon: "🖥️", price: 1565,
+           note: "base configuration, August 1981 — 16 KB RAM, no disk drive", verified: "2026-09" },
+      b: { brand: "Commodore", name: "64", icon: "⌨️", price: 595,
+           note: "launch price, 1982", verified: "2026-09" },
+      fact: "The IBM price bought sixteen kilobytes of memory and no disk drive at all.",
+    },
+    {
+      a: { brand: "3DO", name: "Interactive Multiplayer", icon: "🕹️", price: 700,
+           note: "US launch, October 1993 — $699.99", verified: "2026-09" },
+      b: { brand: "Atari", name: "Jaguar", icon: "🕹️", price: 250,
+           note: "US launch, November 1993 — $249.95", verified: "2026-09" },
+      fact: "Six weeks apart, in the same year, at nearly three times the price.",
+    },
+    {
+      a: { brand: "Sony", name: "PlayStation", icon: "🎮", price: 299,
+           note: "US launch, September 1995", verified: "2026-09" },
+      b: { brand: "Nintendo", name: "Nintendo 64", icon: "🎮", price: 200,
+           note: "US launch, September 1996 — $199.99", verified: "2026-09" },
+      fact: "Sony announced its price on stage at E3 as an entire speech: “Two ninety-nine.”",
+    },
+    {
+      a: { brand: "Sega", name: "Saturn", icon: "🎮", price: 399,
+           note: "US launch, May 1995 — included Virtua Fighter", verified: "2026-09" },
+      b: { brand: "Sega", name: "Dreamcast", icon: "🎮", price: 199,
+           note: "US launch, 9 September 1999", verified: "2026-09" },
+      fact: "Sega's next console cost half as much four years later. The marketing was the price: “9/9/99 for $199.”",
+    },
+    {
+      a: { brand: "Apple", name: "Newton MessagePad", icon: "📝", price: 699,
+           note: "launch price, August 1993", verified: "2026-09" },
+      b: { brand: "Palm", name: "PalmPilot Personal", icon: "📝", price: 299,
+           note: "launch price, March 1997", verified: "2026-09" },
+      fact: "Four years later, at under half the price, and without the handwriting recognition everybody made fun of.",
+    },
+    {
+      a: { brand: "Google", name: "Glass, Explorer Edition", icon: "🕶️", price: 1500,
+           note: "Explorer programme price, shipping from April 2013", verified: "2026-09" },
+      b: { brand: "Apple", name: "Vision Pro", icon: "🥽", price: 3499,
+           note: "launch price, February 2024", verified: "2026-09" },
+      fact: "Eleven years of progress, and the computer you wear on your face got more expensive, not less.",
+    },
+    {
+      a: { brand: "Apple", name: "iPhone, 8 GB", icon: "📱", price: 599,
+           note: "launch price, June 2007 — with a two-year contract", verified: "2026-09" },
+      b: { brand: "Apple", name: "iPod, 5 GB", icon: "🎵", price: 399,
+           note: "launch price, November 2001", verified: "2026-09" },
+      fact: "Six years and two hundred dollars between a thousand songs in your pocket and the thing that made it obsolete.",
+    },
+    {
+      a: { brand: "Microsoft", name: "Xbox", icon: "🎮", price: 299,
+           note: "US launch, 15 November 2001", verified: "2026-09" },
+      b: { brand: "Nintendo", name: "GameCube", icon: "🎮", price: 199,
+           note: "US launch, 18 November 2001", verified: "2026-09" },
+      fact: "Three days apart, and a hundred dollars between them. One of these companies had never sold a console before.",
     },
   ],
 };

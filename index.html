@@ -61,8 +61,8 @@
 
     <!-- role="group", not role="list". An explicit ARIA role REPLACES the
          implicit one, so role="listitem" on these buttons meant a screen
-         reader announced three list items and never said they could be
-         activated at all. Do not put list roles back on interactive
+         reader announced the category buttons as list items and never said
+         they could be activated at all. Do not put list roles back on interactive
          elements; if these ever need list semantics, nest real <li>s. -->
     <div class="cat-grid" role="group" aria-label="Choose a category">
       <button class="cat" type="button" data-cat="cars-watches">
@@ -80,6 +80,11 @@
         <span class="cat-name">Fashion</span>
         <span class="cat-tag">Everyday things, silly prices</span>
       </button>
+      <button class="cat" type="button" data-cat="launch-prices">
+        <span class="cat-icon" aria-hidden="true">📟</span>
+        <span class="cat-name">Launch Prices</span>
+        <span class="cat-tag">What it cost on day one</span>
+      </button>
     </div>
 
     <p class="hint">10 rounds · tap the one you think costs more</p>
@@ -87,7 +92,7 @@
     <!--
       Unlike Named After, this one genuinely cannot degrade: the rounds, the
       count-up and the whole reveal are the product, and they are all script.
-      Without JS the title screen still rendered, but the three category
+      Without JS the title screen still rendered, but the category
       buttons were dead — they looked pressable and did nothing, which is a
       worse experience than being told the truth. So say it plainly and take
       the dead controls away.
@@ -168,7 +173,9 @@
 <footer class="site-footer">
   <p>
     Prices are approximate US retail in USD, checked September 2026, and drift constantly.
-    Auction and resale figures are labelled as such. For entertainment — not a valuation.
+    Auction, resale and historical launch figures are labelled as such — launch prices are
+    in the dollars of their own year, not adjusted for inflation. For entertainment — not a
+    valuation.
   </p>
   <p class="footer-meta">PRICESHOCK · no trackers, no cookies, no accounts</p>
 </footer>
