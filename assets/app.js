@@ -114,7 +114,7 @@
   function cardMarkup(item) {
     return (
       '<span class="card-pick">your pick</span>' +
-      '<span class="card-orb" aria-hidden="true"><svg class="card-art" viewBox="0 0 24 24" aria-hidden="true"><use href="#art-' + artFor(item) + '"/></svg></span>' +
+      orbMarkup(item) +
       '<span class="card-body">' +
         '<span class="card-brand">' + item.brand + "</span>" +
         '<span class="card-name">' + item.name + "</span>" +
@@ -183,6 +183,28 @@
 
   function artFor(item) {
     return ART[item.icon] || "gem";   // `gem` is the never-blank fallback
+  }
+
+  // Must match the slug the fetch script saved files under, character for
+  // character, or every photo silently falls back to line art.
+  function slugFor(item) {
+    return (item.brand + "-" + item.name).toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  // A real photograph where one exists under a licence this site can ship, and
+  // the drawn symbol everywhere else. PHOTOS is generated from what actually
+  // downloaded, so it cannot name a file that is not in the repo.
+  function orbMarkup(item) {
+    var photo = (typeof PHOTOS !== "undefined") && PHOTOS[slugFor(item)];
+    if (photo) {
+      return '<span class="card-orb has-photo" aria-hidden="true">' +
+        '<img class="card-photo" src="assets/photos/' + photo + '" alt="" loading="lazy" decoding="async">' +
+        '</span>';
+    }
+    return '<span class="card-orb" aria-hidden="true">' +
+      '<svg class="card-art" viewBox="0 0 24 24" aria-hidden="true"><use href="#art-' + artFor(item) + '"/></svg>' +
+      '</span>';
   }
 
   // A missing symbol renders an empty orb and nothing throws, so the failure is

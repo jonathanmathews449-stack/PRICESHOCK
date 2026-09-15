@@ -689,6 +689,9 @@ button { font: inherit; color: inherit; }
 }
 .site-footer p { margin: 0 auto; max-width: 62ch; }
 .footer-meta { margin-top: 0.5rem; font-family: var(--mono); letter-spacing: 0.1em; }
+/* Padded to clear WCAG 2.5.8's 24px minimum — the same trap task 008 found in
+   Named After's footer links, which were 18px tall. */
+.footer-meta a { display: inline-block; padding: 0.4rem 0.2rem; color: var(--accent-2); }
 
 /* --- Mobile ----------------------------------------------------------- */
 
@@ -760,3 +763,29 @@ button { font: inherit; color: inherit; }
   .card.is-loser { background: rgba(255, 255, 255, 0.05); }
   .versus { border-color: var(--border-2); }
 }
+
+/* A real photograph fills the orb. `overflow:hidden` plus the round orb does the
+   circular crop, so the images ship as plain rectangles and no cropping tool is
+   needed anywhere in the pipeline. The inner shadow keeps a light photo from
+   dissolving into the card behind it. */
+.card-orb.has-photo {
+  overflow: hidden;
+  /* A light ground, not the dark one. Most freely licensed product shots are cut
+     out on white — on a dark orb they read as a white blob or vanish into it.
+     On a pale disc they sit as though they were photographed for it. */
+  background: #f2f0ea;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+}
+.card-photo {
+  width: 100%;
+  height: 100%;
+  /* cover, not contain. Compared side by side: contain letterboxes every scene
+     photograph into a visible box inside the circle, while cover fills it and
+     still reads correctly for the cut-outs — a cropped Commodore 64 is plainly
+     a Commodore 64. The pale ground behind stays for images with white edges. */
+  object-fit: cover;
+  display: block;
+}
+/* The winner's orb already lifts; give its photo the same lift rather than
+   leaving the picture flat inside a card that is moving. */
+.card.is-winner .card-orb.has-photo { box-shadow: inset 0 0 0 2px var(--accent-2); }

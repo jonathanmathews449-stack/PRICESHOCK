@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- One page, so one entry. Update lastmod when the prices or rounds change,
-     not when the CSS does. -->
+<!-- Update lastmod when the prices or rounds change, not when the CSS does. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://jonathanmathews449-stack.github.io/PRICESHOCK/</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://jonathanmathews449-stack.github.io/PRICESHOCK/credits.html</loc>
     <lastmod>2026-09-15</lastmod>
     <changefreq>monthly</changefreq>
   </url>
