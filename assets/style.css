@@ -526,6 +526,45 @@ button { font: inherit; color: inherit; }
   to   { opacity: 1; transform: none; }
 }
 
+
+/* --- Round payoff ---------------------------------------------------- */
+
+/* The points are the reward, so they are the biggest thing in the slab after
+   the multiplier, and they animate in rather than appearing. */
+.verdict-award {
+  margin: 0.5rem 0 0;
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  animation: popRight 520ms var(--ease-out-back);
+}
+.verdict-award.is-right { color: var(--win); }
+.verdict-award.is-wrong { color: var(--lose); }
+
+.verdict-award-note {
+  margin: 0.35rem 0 0;
+  color: var(--faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  min-height: 1.2em;   /* holds the line so the slab does not jump */
+}
+
+/* Green for the pick that was right, red for the one that was not — on the
+   price itself, which is the number the player is actually looking at. */
+.card.is-picked-right .card-price { color: var(--win); }
+.card.is-picked-wrong .card-price { color: var(--lose); }
+
+.end-tally {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verdict-award { animation: none; }
+}
 .verdict-tag {
   display: inline-block;
   font-family: var(--mono);

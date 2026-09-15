@@ -18,6 +18,15 @@
   var COUNT_MS = 1100;          // price count-up duration
   var SHOCK_RATIO = 3;          // at or above this, it's a "PRICE SHOCK"
 
+  // Scoring. A correct answer is worth BASE; each consecutive correct answer
+  // after the first adds STREAK_STEP, up to STREAK_CAP in a row. So 1st 100,
+  // 2nd 150, 3rd 200, 4th 250, 5th and beyond 300 — a perfect run is 2,500.
+  // Rank still keys off the correct COUNT, not points, so the existing rank
+  // copy stays true and a lucky streak cannot buy a better title.
+  var BASE_POINTS = 100;
+  var STREAK_STEP = 50;
+  var STREAK_CAP = 5;
+
   var el = {
     screens: {
       title: document.getElementById("screen-title"),
@@ -36,6 +45,8 @@
     vMult: document.getElementById("verdict-multiplier"),
     vLine: document.getElementById("verdict-line"),
     vFact: document.getElementById("verdict-fact"),
+    award: document.getElementById("verdict-award"),
+    awardNote: document.getElementById("verdict-award-note"),
     btnNext: document.getElementById("btn-next"),
     btnBack: document.getElementById("btn-back"),
     btnAgain: document.getElementById("btn-again"),
@@ -45,6 +56,7 @@
     endBlurb: document.getElementById("end-blurb"),
     endWorst: document.getElementById("end-worst"),
     endEyebrow: document.getElementById("end-eyebrow"),
+    endTally: document.getElementById("end-tally"),
     live: document.getElementById("live-status"),
   };
 
@@ -53,6 +65,7 @@
     rounds: [],
     index: 0,
     score: 0,
+    points: 0,
     streak: 0,
     bestStreak: 0,
     locked: false,
@@ -237,16 +250,30 @@
 
       if (ratio >= SHOCK_RATIO) fireFlash();
 
+      // Points, and the streak that earned them. `score` stays the count of
+      // correct answers because the ranks are keyed off it; `points` is the
+      // number the player watches.
+      var award = 0;
       if (correct) {
         state.score += 1;
         state.streak += 1;
         state.bestStreak = Math.max(state.bestStreak, state.streak);
+        award = BASE_POINTS + STREAK_STEP * (Math.min(state.streak, STREAK_CAP) - 1);
+        state.points += award;
       } else {
         state.streak = 0;
       }
-      el.score.textContent = state.score;
+      el.score.textContent = state.points;
       el.streak.hidden = state.streak < 2;
       el.streak.textContent = "🔥 " + state.streak + " in a row";
+
+      el.award.className = "verdict-award " + (correct ? "is-right" : "is-wrong");
+      el.award.textContent = correct ? "+" + award : "+0";
+      el.awardNote.textContent = !correct
+        ? "Streak lost"
+        : state.streak >= 3
+          ? state.streak + " in a row · +" + (award - BASE_POINTS) + " streak bonus"
+          : "";
 
       if (!state.biggestShock || ratio > state.biggestShock.ratio) {
         state.biggestShock = {
@@ -292,7 +319,8 @@
         winItem.brand + " " + winItem.name + ", " + money(hi) + ", costs " +
         formatMultiplier(ratio) + " more than " +
         loseIt.brand + " " + loseIt.name + ", " + money(lo) + ". " +
-        "Score " + state.score + " of " + (state.index + 1) + "."
+        (correct ? "Plus " + award + " points. " : "No points. ") +
+        "Score " + state.points + ", " + state.score + " correct of " + (state.index + 1) + "."
       );
 
     }
@@ -317,6 +345,7 @@
     state.categoryId = id;
     state.index = 0;
     state.score = 0;
+    state.points = 0;
     state.streak = 0;
     state.bestStreak = 0;
     state.biggestShock = null;
@@ -357,13 +386,17 @@
   ];
 
   function showResults() {
-    el.endScore.textContent = state.score;
+    el.endScore.textContent = state.points.toLocaleString("en-US");
 
+    // Rank is earned by being right, not by streak luck, so it still reads the
+    // correct count — which is what the rank copy has always described.
     var r = RANKS.filter(function (x) { return state.score >= x.min; })[0];
     el.endRank.textContent = r.rank;
     el.endBlurb.textContent = r.blurb;
-    el.endEyebrow.textContent =
-      state.bestStreak >= 3 ? "Best streak: " + state.bestStreak + " in a row" : "Final score";
+    el.endEyebrow.textContent = "Final score";
+    el.endTally.textContent =
+      state.score + " of " + ROUND_COUNT + " correct" +
+      (state.bestStreak >= 2 ? " · best streak " + state.bestStreak + " in a row" : "");
 
     if (state.biggestShock) {
       var s = state.biggestShock;
