@@ -16,7 +16,7 @@ const PHOTOS = {
   "alba-white-truffle-1-ounce": "alba-white-truffle-1-ounce.jpg",
   "apple-airpods-pro-3": "apple-airpods-pro-3.jpg",
   "apple-ipad-a16": "apple-ipad-a16.png",
-  "apple-iphone-17-pro-256gb": "apple-iphone-17-pro-256gb.png",
+  "apple-iphone-17-pro-max-1tb": "apple-iphone-17-pro-max-1tb.png",
   "apple-iphone-8-gb": "apple-iphone-8-gb.png",
   "apple-ipod-5-gb": "apple-ipod-5-gb.png",
   "apple-lisa": "apple-lisa.jpg",

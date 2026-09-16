@@ -183,9 +183,13 @@ const ROUNDS = {
     {
       a: { brand: "Louis Vuitton", name: "Neverfull MM", icon: "👜", price: 2300,
            note: "approx. retail", verified: "2026-09" },
-      b: { brand: "Peloton", name: "Bike+", icon: "🚲", price: 2495,
-           note: "retail", verified: "2026-09" },
-      fact: "Within $200 of each other. Only one of them gets used after February.",
+      /* Was the Bike+ at $2,495 — a 200-dollar gap on a 2,300-dollar round,
+         which is 8% and unanswerable. The base Bike is a real, current, cheaper
+         product, and the shock survives the change: a tote still costs more
+         than the machine. */
+      b: { brand: "Peloton", name: "Bike", icon: "🚲", price: 1445,
+           note: "retail, base model", verified: "2026-09" },
+      fact: "The bag costs more than the exercise bike. Only one of them is still in use by February.",
     },
     {
       a: { brand: "Dom Pérignon", name: "Vintage Brut, one bottle", icon: "🍾", price: 220,
@@ -218,9 +222,13 @@ const ROUNDS = {
     {
       a: { brand: "Montblanc", name: "Meisterstück 149 fountain pen", icon: "🖋️", price: 1080,
            note: "approx. retail", verified: "2026-09" },
-      b: { brand: "Apple", name: "iPhone 17 Pro (256GB)", icon: "📱", price: 1099,
+      /* Was the 256GB 17 Pro at $1,099 — nineteen dollars apart, which no
+         player can know and which a single price update could invert. The
+         top-of-range Pro Max is the same joke with a gap you can reason about:
+         the pen is still two-thirds of the most expensive iPhone Apple sells. */
+      b: { brand: "Apple", name: "iPhone 17 Pro Max (1TB)", icon: "📱", price: 1599,
            note: "approx. retail", verified: "2026-09" },
-      fact: "A pen designed in 1924, priced within $20 of a supercomputer you keep in your pocket.",
+      fact: "A pen designed in 1924 costs two-thirds of the most expensive iPhone Apple sells.",
     },
     {
       a: { brand: "Hermès", name: "Avalon blanket", icon: "🧣", price: 1800,
@@ -323,19 +331,28 @@ const ROUNDS = {
            note: "launch price, 1984", verified: "2026-09" },
       fact: "The same year. The telephone cost more than the computer, and the telephone could only make telephone calls.",
     },
+    /* These two rounds swapped partners. Nothing here changed price, item or
+       note — only who is paired with whom.
+
+       Launch Prices had the flattest spread of any category: every ratio
+       between 1.5x and 2.8x, no close call and no blowout, so ten rounds all
+       felt like the same round. Pairing the Lisa against the Commodore 64
+       gives the category its one genuine blowout at 16.8x, and it is a better
+       comparison besides — both are home computers from the same three years,
+       which is what makes the gap land. */
     {
       a: { brand: "Apple", name: "Lisa", icon: "🖥️", price: 9995,
            note: "base price at launch, January 1983", verified: "2026-09" },
-      b: { brand: "Segway", name: "Human Transporter", icon: "🛴", price: 5000,
-           note: "price at launch, 2001", verified: "2026-09" },
-      fact: "Two of the most confidently launched products in the business, eighteen years apart. The Lisa was twice the price.",
+      b: { brand: "Commodore", name: "64", icon: "⌨️", price: 595,
+           note: "launch price, 1982", verified: "2026-09" },
+      fact: "Two home computers, one year apart. Seventeen Commodore 64s cost the same as one Lisa, and the Commodore outsold it roughly ten thousand to one.",
     },
     {
       a: { brand: "IBM", name: "Personal Computer 5150", icon: "🖥️", price: 1565,
            note: "base configuration, August 1981 — 16 KB RAM, no disk drive", verified: "2026-09" },
-      b: { brand: "Commodore", name: "64", icon: "⌨️", price: 595,
-           note: "launch price, 1982", verified: "2026-09" },
-      fact: "The IBM price bought sixteen kilobytes of memory and no disk drive at all.",
+      b: { brand: "Segway", name: "Human Transporter", icon: "🛴", price: 5000,
+           note: "price at launch, 2001", verified: "2026-09" },
+      fact: "The machine that created the PC industry, against the one that was going to reshape cities. The IBM cost a third as much.",
     },
     {
       a: { brand: "3DO", name: "Interactive Multiplayer", icon: "🕹️", price: 700,

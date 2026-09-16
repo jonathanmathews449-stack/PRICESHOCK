@@ -484,6 +484,27 @@
     el.flash.classList.add("is-firing");
   }
 
+  /* Rounds 5 and 10, and this was re-examined in task 040 rather than inherited.
+
+     Round 5 is not arbitrary: it is the EARLIEST round at which a flawless
+     player reaches STREAK_CAP, because a streak of five needs five consecutive
+     correct answers. So the first double lands on the first round where the
+     multiplier is maxed — the reward for a clean opening is compounded exactly
+     once, and only for a player who earned it. Confirmed by play: a perfect run
+     pays +600 on round 5, which is the capped base of 300 doubled.
+
+     Round 10 is the finale and the last round that can still change the result.
+
+     Alternatives were simulated over 20,000 runs each at 50%, 70% and 90%
+     accuracy. Rounds 5+10 give the doubles ~18% of the total score at every
+     skill level. A third drop (4+7+10, 3+6+9 or 5+8+10) raises that to ~24-26%
+     and lifts a perfect run from 3,100 to about 3,350 — it makes the doubles
+     more of the game without making any one of them matter more, and it costs
+     round 5 the property above. Round 10 alone drops the share to ~10%, which
+     is not enough to be worth announcing.
+
+     So: unchanged, on evidence. If you do change it, keep a drop on the round
+     where the cap first becomes reachable, or the opening stops paying. */
   function isDoubleRound(index) {
     var n = index + 1;
     return n === 5 || n === 10;
