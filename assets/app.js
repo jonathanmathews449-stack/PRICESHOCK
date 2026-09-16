@@ -258,6 +258,15 @@
     "⌨️": "keyboard", "📺": "tv", "🎮": "controller", "🕹️": "controller",
     "🥽": "vr", "📝": "pda", "🖋️": "pen", "🎵": "musicPlayer",
     "🛵": "scooter", "🛴": "scooter", "🚲": "bicycle",
+    // Food deliberately collapses to three symbols rather than seventeen. The
+    // art is a fallback for a photograph that failed to load, and a plate that
+    // honestly says "some food" is better than a drawn ribeye that will never
+    // be seen — every catalogue item ships a local photograph. Drinks split out
+    // because a cup and a jug are the two that would look wrong as a plate.
+    "🍗": "plate", "🥚": "plate", "🌾": "plate", "🍔": "plate", "🍜": "plate",
+    "🌱": "plate", "🍫": "plate", "🍈": "plate", "🍕": "plate", "🥄": "plate",
+    "🥩": "plate", "🍄": "plate", "🍖": "plate",
+    "☕": "cup", "🥛": "jug", "💧": "jug", "🥃": "bottle",
   };
 
   function artFor(item) {
