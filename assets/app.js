@@ -74,6 +74,11 @@
     btnDaily: document.getElementById("btn-daily"),
     dailyNote: document.getElementById("daily-note"),
     dailyDate: document.getElementById("daily-date"),
+    btnShare: document.getElementById("btn-share"),
+    shareStatus: document.getElementById("share-status"),
+    copyBox: document.getElementById("copybox"),
+    copyText: document.getElementById("copybox-text"),
+    copyClose: document.getElementById("copybox-close"),
     endRecord: document.getElementById("end-record"),
     endRecordLabel: document.getElementById("end-record-label"),
     endBest: document.getElementById("end-best"),
@@ -94,6 +99,7 @@
     recordAtStart: 0,
     isDaily: false,
     dailyKey: null,
+    results: [],
   };
 
   function loadRecords() {
@@ -251,6 +257,13 @@
   // next Tab starts from the top of the document. Each screen carries
   // tabindex="-1" so it can receive focus without entering the tab order.
   function showScreen(name) {
+    // Leaving the results screen with the manual-copy dialog still open would
+    // strand an aria-modal dialog over a screen it does not belong to.
+    if (el.copyBox && !el.copyBox.hidden) closeCopyBox(false);
+    // A "Copied" left over from the last run must not sit under a fresh result
+    // as though this one had been copied.
+    setShareStatus("");
+
     Object.keys(el.screens).forEach(function (k) {
       el.screens[k].classList.toggle("is-active", k === name);
     });
@@ -542,6 +555,10 @@
       // correct answers because the ranks are keyed off it; `points` is the
       // number the player watches.
       var award = 0;
+      // One entry per round, in play order. The share card is built from this
+      // rather than recomputed at the end, because by then the rounds have been
+      // consumed and nothing remembers which ones were missed.
+      state.results.push(correct);
       if (correct) {
         state.score += 1;
         state.streak += 1;
@@ -654,6 +671,7 @@
     state.points = 0;
     state.streak = 0;
     state.bestStreak = 0;
+    state.results = [];
     state.biggestShock = null;
     state.recordAtStart = records.best;
 
@@ -809,6 +827,115 @@
     showScreen("end");
   }
 
+  /* ------------------------------------------------------- share a result */
+
+  var SHARE_URL = "https://jonathanmathews449-stack.github.io/PRICESHOCK/";
+
+  /* What the card may and may not say.
+
+     It carries the player's own outcome per round — right or wrong — and never
+     which item was pricier, what anything cost, or what was in the round. That
+     is the whole constraint: on a daily, everybody is playing the same ten, so
+     a card that leaked the answers would ruin the board for whoever it was sent
+     to. Squares are safe because they describe the sender, not the question. */
+  function shareText() {
+    var squares = state.results.map(function (ok) {
+      return ok ? "🟩" : "🟥";   // green / red square
+    });
+    // Split 5 and 5. Ten in a row wraps unpredictably in chat clients and the
+    // break makes the run scannable at a glance.
+    var grid = squares.slice(0, 5).join("") + " " + squares.slice(5).join("");
+
+    var heading;
+    if (state.isDaily) {
+      heading = "Daily · " + new Date().toLocaleDateString("en-US", {
+        month: "short", day: "numeric", timeZone: "UTC",
+      });
+    } else {
+      var cat = CATEGORIES.filter(function (c) { return c.id === state.categoryId; })[0];
+      heading = cat ? cat.name : "Mixed";
+    }
+
+    var lines = [
+      "PRICESHOCK — " + heading,
+      state.points.toLocaleString("en-US") + " pts · " +
+        state.score + "/" + ROUND_COUNT,
+      grid,
+    ];
+    if (state.bestStreak >= 2) {
+      lines.push("Best streak " + state.bestStreak + " in a row");
+    }
+    if (state.score === ROUND_COUNT) lines.push("Perfect run.");
+    lines.push(SHARE_URL);
+    return lines.join("\n");
+  }
+
+  function setShareStatus(msg) {
+    if (el.shareStatus) el.shareStatus.textContent = msg;
+  }
+
+  /* The manual fallback, and the reason it exists: the Clipboard API rejects
+     without a permission in some browsers, and `execCommand("copy")` is gone or
+     disabled in others. When both refuse there is still something useful to do
+     — show the text, select it, and let the player press the keys themselves.
+     Anything less leaves a button that appears to do nothing. */
+  function openCopyBox(text) {
+    el.copyText.value = text;
+    el.copyBox.hidden = false;
+    el.copyText.focus();
+    el.copyText.select();
+    setShareStatus("Copy it by hand — the text is selected.");
+  }
+
+  /* Focus goes back to the share button by name, not to whatever
+     `document.activeElement` was when the dialog opened. That reading is not
+     reliable — a click does not always move focus, so it can capture <body>,
+     and <body> is not focusable, so calling focus() on it leaves focus inside
+     the dialog that has just been hidden. Since this dialog can only ever be
+     opened by that one button, naming it is both simpler and correct. */
+  function closeCopyBox(returnFocus) {
+    el.copyBox.hidden = true;
+    // showScreen() passes false: it closes the dialog on the way OUT of the
+    // results screen, and focusing a button there would drag focus back onto
+    // the screen being left.
+    if (returnFocus !== false && el.btnShare) el.btnShare.focus();
+  }
+
+  // Selection-copy, the middle rung. Uses a real textarea because a hidden or
+  // zero-size one is not selectable in every browser, and reads back
+  // execCommand's return value — it reports failure rather than throwing.
+  function copyBySelection(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  function shareResult() {
+    var text = shareText();
+
+    // Clipboard API first, its fallbacks in order. Every branch ends in a
+    // message: a copy that silently fails is worse than one that admits it.
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        setShareStatus("Copied. Paste it wherever you like.");
+      }, function () {
+        if (copyBySelection(text)) setShareStatus("Copied. Paste it wherever you like.");
+        else openCopyBox(text);
+      });
+      return;
+    }
+    if (copyBySelection(text)) setShareStatus("Copied. Paste it wherever you like.");
+    else openCopyBox(text);
+  }
+
+
   /* ------------------------------------------------------------- wiring */
 
   // #rrggbb -> "rgba(r, g, b, a)". Written out rather than reached for from a
@@ -847,6 +974,17 @@
     if (state.isDaily) startDaily(); else startCategory(state.categoryId);
   });
   el.btnDaily.addEventListener("click", startDaily);
+  el.btnShare.addEventListener("click", shareResult);
+  // Wrapped, not passed by reference: the listener would hand the event object
+  // to closeCopyBox as its returnFocus argument.
+  el.copyClose.addEventListener("click", function () { closeCopyBox(true); });
+
+  // Escape closes the manual-copy dialog. Without it the only way out is the
+  // Done button, which a keyboard user reaches only after tabbing through the
+  // textarea they were told to press Ctrl+C in.
+  el.copyBox.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { e.stopPropagation(); closeCopyBox(true); }
+  });
 
   // Keyboard: left/right to pick, Enter/Space to advance. Makes it playable
   // without a mouse and is genuinely faster.

@@ -265,7 +265,28 @@
 
     <div class="end-actions">
       <button class="btn btn-primary" id="btn-again" type="button">Play again</button>
+      <button class="btn btn-share" id="btn-share" type="button">Share result</button>
       <button class="btn btn-ghost" id="btn-categories" type="button">Pick another category</button>
+    </div>
+
+    <!-- Announced separately from the results heading, because a copy either
+         working or failing is news the player needs and a screen reader would
+         otherwise get no signal at all from a button that looks unchanged. -->
+    <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
+
+    <!-- The manual-copy fallback. In the markup rather than built on demand so
+         it can be a real dialog with a real label, and [hidden] so nothing
+         inside it is focusable until it is opened. -->
+    <div class="copybox" id="copybox" role="dialog" aria-modal="true"
+         aria-labelledby="copybox-title" hidden>
+      <div class="copybox-inner">
+        <h2 class="copybox-title" id="copybox-title">Copy your result</h2>
+        <p class="copybox-note">Your browser would not let the page copy for you.
+          The text below is selected &mdash; press Ctrl+C, or Cmd+C on a Mac.</p>
+        <textarea class="copybox-text" id="copybox-text" rows="7" readonly
+                  aria-label="Your result, ready to copy"></textarea>
+        <button class="btn btn-ghost" id="copybox-close" type="button">Done</button>
+      </div>
     </div>
 
     <div class="end-worst" id="end-worst"></div>

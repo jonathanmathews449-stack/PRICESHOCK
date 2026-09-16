@@ -861,11 +861,20 @@ button { font: inherit; color: inherit; }
   border-radius: 999px;
   margin-bottom: 0.7rem;
 }
-/* 12%, not 18%: the tag is 11.5px uppercase mono, so it needs AA at 4.5:1,
-   and an 18% tint of --lose lifted its own background until the text on it
-   measured 4.42:1. At 12% it is 4.79:1, and the win tag 8.71:1. */
-.verdict-tag.is-right { background: color-mix(in srgb, var(--win) 12%, transparent); color: var(--win); }
-.verdict-tag.is-wrong { background: color-mix(in srgb, var(--lose) 12%, transparent); color: var(--lose); }
+/* Opaque, not a tint of the text colour over whatever happens to be behind.
+
+   These were a 12% tint tuned to 4.79:1 against the old #08070c page. Raising
+   --bg to #16111f in task 034 lifted the composited background with it and the
+   "Wrong" tag fell to 4.02:1 — a real AA failure, on 11.5px uppercase mono, and
+   one that only appears on the game screen, which is why a title-screen audit
+   missed it twice.
+
+   Fixing the tint percentage again would leave the same trap for the next
+   person who touches --bg. A fixed background cannot drift: measured here at
+   5.09:1 for the loss tag and 8.93:1 for the win tag, and those numbers hold
+   whatever the page behind them does. */
+.verdict-tag.is-right { background: #0d2a1c; color: var(--win); }
+.verdict-tag.is-wrong { background: #2a1019; color: var(--lose); }
 
 .verdict-multiplier {
   font-size: clamp(2.2rem, 9vw, 4.6rem);
@@ -1149,3 +1158,67 @@ button { font: inherit; color: inherit; }
   color: transparent;
 }
 .screen-end.is-perfect .end-tally { color: var(--accent-2); }
+
+/* --- Share a result --------------------------------------------------- */
+
+/* Between "Play again" and "Pick another category" in weight: it is a real
+   action, not a way out of the screen, so it reads as an outlined primary
+   rather than borrowing either of theirs. */
+.btn-share {
+  background: transparent;
+  border: 1px solid var(--accent-2);
+  color: var(--accent-2);
+}
+.btn-share:hover, .btn-share:focus-visible {
+  background: var(--surface-2);
+  border-color: var(--accent);
+}
+
+/* Reserves its line whether or not there is a message, so the buttons above do
+   not jump when a copy succeeds. */
+.share-status {
+  min-height: 1.4em;
+  margin: 0.55rem 0 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.copybox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  background: rgba(8, 6, 14, 0.72);
+  backdrop-filter: blur(4px);
+}
+.copybox-inner {
+  width: 100%;
+  max-width: 30rem;
+  padding: 1.4rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+}
+.copybox-title { margin: 0 0 0.4rem; font-size: 1.15rem; }
+.copybox-note { margin: 0 0 0.9rem; font-size: 0.88rem; color: var(--muted); }
+
+/* The mono face and the pre-wrap matter: the card is a block of squares and
+   line breaks, and a proportional font makes the two rows of five stop lining
+   up with each other. */
+.copybox-text {
+  width: 100%;
+  margin-bottom: 0.9rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+}
