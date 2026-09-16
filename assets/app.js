@@ -149,6 +149,17 @@
     });
     window.scrollTo({ top: 0, behavior: "auto" });
 
+    // Back to house colours on the title screen. startCategory() pins --accent
+    // to whichever category is being played, and without this the page kept
+    // that tint after "Pick another category" — so the grid of six differently
+    // coloured cards sat inside, say, a green Launch Prices wash, which reads
+    // as though a category were still selected. Clearing the inline values
+    // lets :root's own defaults take over again.
+    if (name === "title") {
+      document.documentElement.style.removeProperty("--accent");
+      document.documentElement.style.removeProperty("--accent-2");
+    }
+
     var active = el.screens[name];
     if (active && typeof active.focus === "function") active.focus();
   }
@@ -616,7 +627,27 @@
 
   /* ------------------------------------------------------------- wiring */
 
+  // #rrggbb -> "rgba(r, g, b, a)". Written out rather than reached for from a
+  // CSS color-mix(), because the cards have to tint correctly in browsers that
+  // predate it and because doing it here keeps the card colour and the in-game
+  // accent reading from one source: the CATEGORIES entry below.
+  function rgba(hex, alpha) {
+    var h = hex.replace("#", "");
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    return "rgba(" + ((n >> 16) & 255) + ", " + ((n >> 8) & 255) + ", " +
+           (n & 255) + ", " + alpha + ")";
+  }
+
   Array.prototype.forEach.call(document.querySelectorAll(".cat"), function (btn) {
+    var cat = CATEGORIES.filter(function (c) { return c.id === btn.dataset.cat; })[0];
+    if (cat) {
+      btn.style.setProperty("--cat", cat.accent);
+      btn.style.setProperty("--cat-2", cat.accent2);
+      // Border strength, not fill: at full opacity the outline shouts louder
+      // than the icon chip and the six cards start competing with each other.
+      btn.style.setProperty("--cat-soft", rgba(cat.accent, 0.42));
+    }
     btn.addEventListener("click", function () { startCategory(btn.dataset.cat); });
   });
 

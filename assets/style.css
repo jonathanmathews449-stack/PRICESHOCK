@@ -10,16 +10,25 @@
    ========================================================================== */
 
 :root {
-  --bg:        #08070c;
-  --bg-2:      #0f0d16;
-  --surface:   rgba(255, 255, 255, 0.045);
-  --surface-2: rgba(255, 255, 255, 0.075);
-  --border:    rgba(255, 255, 255, 0.12);
-  --border-2:  rgba(255, 255, 255, 0.22);
+  /* Not black. The page used to sit at #08070c, which reads as an unlit screen
+     rather than as a room with the lights low — and it flattened the two colour
+     blobs behind it into grey smudges, because a blurred colour has nothing to
+     mix into at that luminance. Lifting the base into a deep plum gives the
+     wash something to tint, and costs almost nothing in contrast: the figures
+     beside each token are measured against the new --bg, not assumed. */
+  --bg:        #16111f;
+  --bg-2:      #201a2e;
+  --surface:   rgba(255, 255, 255, 0.062);
+  --surface-2: rgba(255, 255, 255, 0.105);
+  --border:    rgba(255, 255, 255, 0.15);
+  --border-2:  rgba(255, 255, 255, 0.28);
 
-  --text:      #f6f4ff;
-  --muted:     #a9a3c0;
-  --faint:     #81799a;
+  --text:      #f6f4ff;   /* 17.02:1 on --bg */
+  --muted:     #b6afc9;   /*  8.79:1 on --bg */
+  /* Raised from #81799a, which measures 4.53:1 on the new base — passing, but
+     by three hundredths, and it is body-size text on .cat-tag. On the old
+     near-black it had 4.91:1, so the lift had to be paid for somewhere. */
+  --faint:     #968ead;   /*  5.97:1 on --bg */
 
   /* Overwritten per category by app.js */
   --accent:    #ff4d4d;
@@ -79,7 +88,7 @@ button { font: inherit; color: inherit; }
   width: 60vmax; height: 60vmax;
   border-radius: 50%;
   filter: blur(90px);
-  opacity: 0.34;
+  opacity: 0.46;
   will-change: transform;
 }
 .blob-1 {
@@ -221,7 +230,22 @@ button { font: inherit; color: inherit; }
   max-width: 52rem;
 }
 
+/* Each card wears its own category's colour. The three --cat-* properties are
+   set on the button by app.js, straight from the same CATEGORIES entry that
+   startCategory() later hands to --accent — so a card can never advertise one
+   colour and then open a game in another. The rgba variants are computed in JS
+   rather than with color-mix(), which keeps this working in browsers that do
+   not have it and keeps the maths in one place.
+
+   The fallbacks below matter: they are what a card shows if app.js never runs,
+   and they resolve to the house accent rather than to nothing. */
 .cat {
+  --cat:       var(--accent);
+  --cat-2:     var(--accent-2);
+  --cat-soft:  var(--border-2);
+
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -229,25 +253,56 @@ button { font: inherit; color: inherit; }
   padding: 1.5rem 1.35rem;
   text-align: left;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--cat-soft);
   border-radius: var(--radius);
   cursor: pointer;
   backdrop-filter: blur(12px);
   transition: transform 180ms var(--ease-out-back), border-color 180ms, background 180ms;
 }
+
+/* The colour wash lives on a pseudo-element, not on `background`, so that
+   hovering can fade it without also animating the blur behind it. */
+.cat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(150deg, var(--cat), var(--cat-2) 85%);
+  opacity: 0.15;
+  transition: opacity 180ms;
+  pointer-events: none;
+}
+.cat > * { position: relative; }
+
 .cat:hover, .cat:focus-visible {
   transform: translateY(-5px);
-  border-color: var(--border-2);
+  border-color: var(--cat);
   background: var(--surface-2);
 }
-.cat-icon { font-size: 2.1rem; line-height: 1; margin-bottom: 0.35rem; }
+.cat:hover::before, .cat:focus-visible::before { opacity: 0.27; }
+
+/* The icon sits on a solid chip of the category's gradient. This is the part
+   that actually does the work of telling six cards apart at a glance — the
+   wash alone is too quiet at 15% to read as identity, and the emoji on its own
+   was the only difference between the cards before this change. */
+.cat-icon {
+  display: grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 16px;
+  background: linear-gradient(140deg, var(--cat), var(--cat-2));
+  box-shadow: 0 6px 18px -8px var(--cat);
+  font-size: 1.6rem;
+  line-height: 1;
+}
 .cat-name { font-size: 1.22rem; font-weight: 750; letter-spacing: -0.015em; }
-.cat-vs { color: var(--accent); font-style: italic; }
+.cat-vs { color: var(--cat); font-style: italic; }
 .cat-tag { font-size: 0.84rem; color: var(--faint); }
 
 /* Shown only inside <noscript> in index.html, where the category buttons are
    hidden because nothing would happen if they were pressed. --muted on --bg
-   measures 7.7:1, so it is readable as body copy rather than as fine print. */
+   measures 8.79:1, so it is readable as body copy rather than as fine print. */
 .noscript-note {
   max-width: 34rem;
   margin: 1.4rem auto 0;
@@ -927,6 +982,16 @@ button { font: inherit; color: inherit; }
   .card { background: rgba(255, 255, 255, 0.09); }
   .card.is-loser { background: rgba(255, 255, 255, 0.05); }
   .versus { border-color: var(--border-2); }
+
+  /* The category cards keep their colour here — the icon chip is the whole
+     point of the identity and it is a solid fill, not a wash. What goes is the
+     15% gradient behind the text, which is the low-contrast part. The border
+     goes the other way and takes the category colour at full strength, so the
+     cards stay told apart by exactly the same hue, just louder. */
+  .cat::before { opacity: 0; }
+  .cat { background: rgba(255, 255, 255, 0.09); border-color: var(--cat); }
+  .cat:hover, .cat:focus-visible { background: rgba(255, 255, 255, 0.14); }
+  .cat:hover::before, .cat:focus-visible::before { opacity: 0; }
 }
 
 /* A real photograph fills the orb. `overflow:hidden` plus the round orb does the
