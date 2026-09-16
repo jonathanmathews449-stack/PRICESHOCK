@@ -79,6 +79,8 @@
     copyBox: document.getElementById("copybox"),
     copyText: document.getElementById("copybox-text"),
     copyClose: document.getElementById("copybox-close"),
+    btnSound: document.getElementById("btn-sound"),
+    soundLabel: document.getElementById("sound-label"),
     endRecord: document.getElementById("end-record"),
     endRecordLabel: document.getElementById("end-record-label"),
     endBest: document.getElementById("end-best"),
@@ -114,9 +116,12 @@
         // accounts" into a claim needing an asterisk, and nothing in the game
         // reads further back than today.
         daily: parsed.daily || null,
+        // Sound is on unless the player has turned it off. `=== true` would
+        // silence everyone who has a stored record from before this existed.
+        muted: parsed.muted === true,
       };
     } catch (err) {
-      return { best: 0, runs: 0, bestByCategory: {}, daily: null };
+      return { best: 0, runs: 0, bestByCategory: {}, daily: null, muted: false };
     }
   }
 
@@ -568,6 +573,21 @@
       } else {
         state.streak = 0;
       }
+
+      /* Cues, in the order they would be heard. A streak note stacks on top of
+         the correct note rather than replacing it, so two in a row still sounds
+         like a correct answer that also happened to be a streak — replacing it
+         made the streak read as a different, unrelated event. A Double Drop
+         replaces both, because it is the loudest thing that can happen in a
+         round and three cues at once is noise. */
+      if (!correct) {
+        SFX.wrong();
+      } else if (isDoubleRound(state.index)) {
+        SFX.doubleDrop();
+      } else {
+        SFX.correct();
+        if (state.streak >= 2) SFX.streak(state.streak);
+      }
       el.score.textContent = state.points;
       el.streak.hidden = state.streak < 2;
       el.streak.textContent = "🔥 " + state.streak + " in a row";
@@ -811,7 +831,7 @@
         ? (previousBest ? "+" + (state.points - previousBest).toLocaleString("en-US") + " over your old best" : "First score on the board")
         : "Category best " + records.bestByCategory[state.categoryId].toLocaleString("en-US") + " pts";
     }
-    if (perfect) fireFlash();
+    if (perfect) { fireFlash(); SFX.perfect(); }
 
     if (state.biggestShock) {
       var s = state.biggestShock;
@@ -825,6 +845,128 @@
     }
 
     showScreen("end");
+  }
+
+  /* --------------------------------------------------------------- sound */
+
+  /* Synthesised, not sampled. Five short cues would be five binary files to
+     licence, credit, ship and keep in the publish manifest, and the whole site
+     is buildless — WebAudio costs a hundred lines and nothing else.
+
+     Three rules this obeys, in order of how badly breaking them reads:
+
+       1. Nothing is created before a user gesture. Browsers refuse to start an
+          AudioContext without one, and constructing it early just yields a
+          suspended context and a console warning on every load. The context is
+          built inside the first play() that follows a real interaction.
+       2. Muted means silent AND inert — no context at all. A muted player
+          should not have an audio graph running for nothing.
+       3. Every entry point is wrapped. Audio is a garnish; a browser that
+          refuses it must cost the player nothing and log nothing. */
+  var audio = { ctx: null, master: null, failed: false };
+
+  function audioReady() {
+    if (records.muted || audio.failed) return null;
+    if (audio.ctx) {
+      // Chrome suspends the context when it is created too eagerly, and again
+      // when a tab is backgrounded. Resuming is cheap and a no-op when running.
+      if (audio.ctx.state === "suspended") { try { audio.ctx.resume(); } catch (e) {} }
+      return audio.ctx;
+    }
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) { audio.failed = true; return null; }
+      audio.ctx = new Ctx();
+      audio.master = audio.ctx.createGain();
+      // Deliberately quiet. These play over whatever the player already has on.
+      audio.master.gain.value = 0.16;
+      audio.master.connect(audio.ctx.destination);
+      return audio.ctx;
+    } catch (err) {
+      audio.failed = true;
+      return null;
+    }
+  }
+
+  /* One voice: an oscillator, a gain envelope, and a stop. The envelope matters
+     more than the waveform — a gain that jumps to its value instead of ramping
+     produces a click on every note, which is the difference between a cue and
+     a pop. */
+  function tone(opts) {
+    var ctx = audioReady();
+    if (!ctx) return;
+    try {
+      var t0 = ctx.currentTime + (opts.delay || 0);
+      var dur = opts.dur || 0.12;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = opts.type || "triangle";
+      osc.frequency.setValueAtTime(opts.from, t0);
+      if (opts.to && opts.to !== opts.from) {
+        osc.frequency.exponentialRampToValueAtTime(opts.to, t0 + dur);
+      }
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(opts.peak || 1, t0 + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(gain);
+      gain.connect(audio.master);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.02);
+    } catch (err) { /* A refused note is not worth a broken round. */ }
+  }
+
+  var SFX = {
+    // Up a fifth, quickly. Rising reads as "yes" without needing a tune.
+    correct: function () {
+      tone({ from: 620, to: 930, dur: 0.11, peak: 0.9 });
+      tone({ from: 930, to: 1240, dur: 0.16, delay: 0.08, peak: 0.55 });
+    },
+    // Down, and squarer. Short enough not to editorialise about being wrong.
+    wrong: function () {
+      tone({ from: 260, to: 150, dur: 0.24, type: "sawtooth", peak: 0.5 });
+    },
+    /* Pitched by streak length so three in a row and five in a row are audibly
+       different events rather than the same ding repeated. Capped with the
+       payout ladder — past STREAK_CAP nothing more is earned, so nothing more
+       is promised. */
+    streak: function (n) {
+      var step = Math.min(n, STREAK_CAP);
+      var base = 660 * Math.pow(1.122, step);   // ~a semitone per step
+      tone({ from: base, to: base * 1.5, dur: 0.13, peak: 0.75 });
+    },
+    // Two notes and a fifth above: the only cue that is allowed to sound big.
+    doubleDrop: function () {
+      tone({ from: 440, to: 660, dur: 0.18, peak: 0.85 });
+      tone({ from: 660, to: 880, dur: 0.22, delay: 0.1, peak: 0.8 });
+      tone({ from: 1320, to: 1320, dur: 0.3, delay: 0.18, peak: 0.4, type: "sine" });
+    },
+    // Ten from ten. A four-note arpeggio, the longest thing the game plays.
+    perfect: function () {
+      [523, 659, 784, 1047].forEach(function (f, i) {
+        tone({ from: f, to: f, dur: 0.22, delay: i * 0.11, peak: 0.7, type: "sine" });
+      });
+    },
+  };
+
+  function setMuted(muted) {
+    records.muted = !!muted;
+    saveRecords();
+    if (records.muted && audio.ctx) {
+      // Tear the graph down rather than leaving it suspended: muted should mean
+      // the page is not holding an audio device open.
+      try { audio.ctx.close(); } catch (err) {}
+      audio.ctx = null;
+      audio.master = null;
+    }
+    updateSoundToggle();
+  }
+
+  function updateSoundToggle() {
+    if (!el.btnSound) return;
+    var on = !records.muted;
+    el.btnSound.setAttribute("aria-pressed", on ? "true" : "false");
+    el.btnSound.classList.toggle("is-muted", !on);
+    el.soundLabel.textContent = on ? "Sound" : "Muted";
   }
 
   /* ------------------------------------------------------- share a result */
@@ -974,6 +1116,11 @@
     if (state.isDaily) startDaily(); else startCategory(state.categoryId);
   });
   el.btnDaily.addEventListener("click", startDaily);
+
+  // Unhidden here, not in the markup: without script it silences nothing.
+  el.btnSound.hidden = false;
+  updateSoundToggle();
+  el.btnSound.addEventListener("click", function () { setMuted(!records.muted); });
   el.btnShare.addEventListener("click", shareResult);
   // Wrapped, not passed by reference: the listener would hand the event object
   // to closeCopyBox as its returnFocus argument.

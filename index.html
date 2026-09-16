@@ -82,6 +82,24 @@
   <span class="blob blob-2"></span>
   <span class="grid"></span>
 </div>
+<!-- Fixed, because it has to be reachable from all three screens and a player
+     who wants it off wants it off now, not after finding the right screen.
+     aria-pressed carries the state; the label stays "Sound" either way so a
+     screen reader reads one control with a state rather than two controls.
+     Ships hidden and is unhidden by app.js, like every other control here:
+     without script it would be a button that silences nothing. -->
+<button class="sound-toggle" id="btn-sound" type="button" aria-pressed="true" hidden>
+  <span class="sound-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 9.5h3.2L12 5.5v13L7.2 14.5H4z"/>
+      <path class="sound-waves" d="M15.6 9.2a4 4 0 0 1 0 5.6M18.2 6.6a7.6 7.6 0 0 1 0 10.8"/>
+      <path class="sound-slash" d="M16 9l5.4 6M21.4 9 16 15"/>
+    </svg>
+  </span>
+  <span class="sound-label" id="sound-label">Sound</span>
+</button>
+
 
 <!-- Flash layer for the reveal. Purely decorative. -->
 <div class="flash" id="flash" aria-hidden="true"></div>

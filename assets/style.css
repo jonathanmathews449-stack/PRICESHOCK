@@ -1222,3 +1222,71 @@ button { font: inherit; color: inherit; }
   line-height: 1.5;
   resize: vertical;
 }
+
+/* --- Sound toggle ----------------------------------------------------- */
+
+/* Fixed to the top right of the viewport, above the screens but below the
+   copy dialog, so it is reachable whether the player is on the title, mid-round
+   or reading their result. 44px tall at every width: this is the one control
+   somebody reaches for in a hurry, usually on a phone, usually because a room
+   just went quiet. */
+.sound-toggle {
+  position: fixed;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.5rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+.sound-toggle:hover, .sound-toggle:focus-visible {
+  color: var(--text);
+  border-color: var(--border-2);
+  background: var(--surface-2);
+}
+.sound-icon { display: grid; place-items: center; }
+.sound-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* One icon, two states: the waves and the cross swap. Drawn as two paths in
+   the same SVG rather than two SVGs, so the speaker body never moves and the
+   change reads as the same object being switched off. */
+.sound-slash { display: none; }
+.sound-toggle.is-muted .sound-waves { display: none; }
+.sound-toggle.is-muted .sound-slash { display: inline; }
+.sound-toggle.is-muted { color: var(--faint); }
+
+@media (max-width: 40rem) {
+  /* The word goes; the speaker stays. At 390px the pill was reaching a third of
+     the way across the logo. aria-pressed still carries the state, and the
+     accessible name still comes from the label text, which is only visually
+     hidden rather than removed. */
+  .sound-label {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .sound-toggle { min-width: 44px; padding: 0.5rem; justify-content: center; }
+}
+
+/* The toggle is fixed, so it sits over whatever is at the top of the screen —
+   and what is at the top of the title screen is a logo that fills the width.
+   At 442px the pill landed squarely on the K of SHOCK. Reserving the height
+   below 60rem keeps every screen clear of it; above that the logo has narrowed
+   enough, relative to the viewport, that they no longer meet. */
+@media (max-width: 60rem) {
+  .screen { padding-top: 3.2rem; }
+}
