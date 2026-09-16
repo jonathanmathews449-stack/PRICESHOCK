@@ -15,17 +15,19 @@
   "use strict";
 
   var ROUND_COUNT = 10;
-  var COUNT_MS = 1100;          // price count-up duration
+  var COUNT_MS = 650;           // fast enough to keep the loop hot; click skips it
   var SHOCK_RATIO = 3;          // at or above this, it's a "PRICE SHOCK"
 
   // Scoring. A correct answer is worth BASE; each consecutive correct answer
   // after the first adds STREAK_STEP, up to STREAK_CAP in a row. So 1st 100,
-  // 2nd 150, 3rd 200, 4th 250, 5th and beyond 300 — a perfect run is 2,500.
+  // 2nd 150, 3rd 200, 4th 250, 5th and beyond 300. Rounds 5 and 10 pay
+  // double, so a perfect run is 3,100.
   // Rank still keys off the correct COUNT, not points, so the existing rank
   // copy stays true and a lucky streak cannot buy a better title.
   var BASE_POINTS = 100;
   var STREAK_STEP = 50;
   var STREAK_CAP = 5;
+  var STORAGE_KEY = "priceshock-records-v1";
 
   var el = {
     screens: {
@@ -39,7 +41,12 @@
     round: document.getElementById("hud-round"),
     progress: document.getElementById("progress-fill"),
     score: document.getElementById("hud-score"),
+    hudBest: document.getElementById("hud-best"),
+    hudBestWrap: document.getElementById("hud-best-wrap"),
+    hudNext: document.getElementById("hud-next"),
+    roundPrompt: document.getElementById("round-prompt"),
     streak: document.getElementById("hud-streak"),
+    heatSteps: document.querySelectorAll("[data-heat]"),
     verdict: document.getElementById("verdict"),
     vTag: document.getElementById("verdict-tag"),
     vMult: document.getElementById("verdict-multiplier"),
@@ -57,6 +64,12 @@
     endWorst: document.getElementById("end-worst"),
     endEyebrow: document.getElementById("end-eyebrow"),
     endTally: document.getElementById("end-tally"),
+    titleBest: document.getElementById("title-best"),
+    titleBestNote: document.getElementById("title-best-note"),
+    endRecord: document.getElementById("end-record"),
+    endRecordLabel: document.getElementById("end-record-label"),
+    endBest: document.getElementById("end-best"),
+    endRecordNote: document.getElementById("end-record-note"),
     live: document.getElementById("live-status"),
   };
 
@@ -70,7 +83,38 @@
     bestStreak: 0,
     locked: false,
     biggestShock: null,
+    recordAtStart: 0,
   };
+
+  function loadRecords() {
+    try {
+      var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      return {
+        best: Number(parsed.best) || 0,
+        runs: Number(parsed.runs) || 0,
+        bestByCategory: parsed.bestByCategory || {},
+      };
+    } catch (err) {
+      return { best: 0, runs: 0, bestByCategory: {} };
+    }
+  }
+
+  var records = loadRecords();
+
+  function saveRecords() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+    catch (err) { /* Private browsing can deny storage; the game still works. */ }
+  }
+
+  function updateRecordDisplays() {
+    var formatted = records.best.toLocaleString("en-US");
+    el.titleBest.textContent = formatted;
+    el.hudBest.textContent = formatted;
+    el.endBest.textContent = formatted;
+    el.titleBestNote.textContent = records.runs
+      ? records.runs + (records.runs === 1 ? " run played" : " runs played")
+      : "Set the first record";
+  }
 
   /* ---------------------------------------------------------- utilities */
 
@@ -111,9 +155,10 @@
 
   /* ------------------------------------------------------------- render */
 
-  function cardMarkup(item) {
+  function cardMarkup(item, key, arrow) {
     return (
       '<span class="card-pick">your pick</span>' +
+      '<span class="card-key" aria-hidden="true">' + arrow + " " + key + "</span>" +
       orbMarkup(item) +
       '<span class="card-body">' +
         '<span class="card-brand">' + item.brand + "</span>" +
@@ -131,20 +176,27 @@
 
   function renderRound() {
     var round = state.rounds[state.index];
+    var roundNumber = state.index + 1;
+    var doubleDrop = roundNumber === 5 || roundNumber === 10;
 
     [el.cardA, el.cardB].forEach(function (card) {
       card.className = "card";
       card.disabled = false;
     });
 
-    el.cardA.innerHTML = cardMarkup(round.left);
-    el.cardB.innerHTML = cardMarkup(round.right);
+    el.cardA.innerHTML = cardMarkup(round.left, "A", "←");
+    el.cardB.innerHTML = cardMarkup(round.right, "B", "→");
     el.cardA.setAttribute("aria-label", "Choose " + round.left.brand + " " + round.left.name);
     el.cardB.setAttribute("aria-label", "Choose " + round.right.brand + " " + round.right.name);
 
     el.verdict.hidden = true;
     el.round.textContent = "Round " + (state.index + 1) + " / " + ROUND_COUNT;
     el.progress.style.width = (state.index / ROUND_COUNT) * 100 + "%";
+    el.roundPrompt.innerHTML = doubleDrop
+      ? '<span class="double-drop">Double drop</span> Which costs <em>more</em>?'
+      : 'Which costs <em>more</em>?';
+    el.screens.game.classList.toggle("is-double", doubleDrop);
+    updateHeat();
     state.locked = false;
 
     // Hiding the verdict destroys the focus that was on its Next button, so
@@ -210,17 +262,22 @@
   // A missing symbol renders an empty orb and nothing throws, so the failure is
   // silent and only visible if you happen to look at that one card. Check the
   // whole dataset once, at load, and say so loudly.
-  (function verifyArt() {
+  (function verifyAssets() {
     var missing = [];
+    var missingPhotos = [];
     Object.keys(ROUNDS).forEach(function (cat) {
       ROUNDS[cat].forEach(function (round) {
         [round.a, round.b].forEach(function (item) {
           if (!ART[item.icon]) missing.push(cat + ": " + item.brand + " " + item.name + " (" + item.icon + ")");
           else if (!document.getElementById("art-" + ART[item.icon])) missing.push("no symbol #art-" + ART[item.icon]);
+          if (typeof PHOTOS === "undefined" || !PHOTOS[slugFor(item)]) {
+            missingPhotos.push(cat + ": " + item.brand + " " + item.name);
+          }
         });
       });
     });
     if (missing.length) console.error("PRICESHOCK: items without art:", missing);
+    if (missingPhotos.length) console.error("PRICESHOCK: items without photographs:", missingPhotos);
   })();
 
   // Anything mid-count registers a finisher here, so a skip can land on exactly
@@ -282,6 +339,32 @@
     el.flash.classList.add("is-firing");
   }
 
+  function isDoubleRound(index) {
+    var n = index + 1;
+    return n === 5 || n === 10;
+  }
+
+  function payoutFor(streakAfterHit, index) {
+    var base = BASE_POINTS + STREAK_STEP * (Math.min(streakAfterHit, STREAK_CAP) - 1);
+    return base * (isDoubleRound(index) ? 2 : 1);
+  }
+
+  function updateHeat(afterRound) {
+    var active = Math.max(1, Math.min(state.streak + 1, STREAK_CAP));
+    Array.prototype.forEach.call(el.heatSteps, function (step) {
+      step.classList.toggle("is-active", Number(step.dataset.heat) === active);
+      step.classList.toggle("is-earned", Number(step.dataset.heat) < active);
+    });
+    var payoutIndex = afterRound ? state.index + 1 : state.index;
+    if (payoutIndex >= ROUND_COUNT) {
+      el.hudNext.textContent = "Run complete";
+    } else {
+      var next = payoutFor(Math.min(state.streak + 1, STREAK_CAP), payoutIndex);
+      el.hudNext.textContent = (isDoubleRound(payoutIndex) ? "Next: double · " : "Next hit ") + "+" + next;
+    }
+    el.hudBestWrap.classList.toggle("is-beating", state.points > state.recordAtStart);
+  }
+
   function choose(side) {
     if (state.locked) return;
     state.locked = true;
@@ -336,7 +419,7 @@
         state.score += 1;
         state.streak += 1;
         state.bestStreak = Math.max(state.bestStreak, state.streak);
-        award = BASE_POINTS + STREAK_STEP * (Math.min(state.streak, STREAK_CAP) - 1);
+        award = payoutFor(state.streak, state.index);
         state.points += award;
       } else {
         state.streak = 0;
@@ -344,13 +427,16 @@
       el.score.textContent = state.points;
       el.streak.hidden = state.streak < 2;
       el.streak.textContent = "🔥 " + state.streak + " in a row";
+      updateHeat(true);
 
       el.award.className = "verdict-award " + (correct ? "is-right" : "is-wrong");
       el.award.textContent = correct ? "+" + award : "+0";
       el.awardNote.textContent = !correct
         ? "Streak lost"
         : state.streak >= 3
-          ? state.streak + " in a row · +" + (award - BASE_POINTS) + " streak bonus"
+          ? state.streak + " in a row · " + (isDoubleRound(state.index) ? "double drop" : "+" + (award - BASE_POINTS) + " streak bonus")
+          : isDoubleRound(state.index)
+            ? "Double drop payout"
           : "";
 
       if (!state.biggestShock || ratio > state.biggestShock.ratio) {
@@ -440,6 +526,7 @@
     state.streak = 0;
     state.bestStreak = 0;
     state.biggestShock = null;
+    state.recordAtStart = records.best;
 
     // Randomise which side each item lands on, so position carries no signal.
     state.rounds = shuffle(poolFor(id)).slice(0, ROUND_COUNT).map(function (r) {
@@ -453,6 +540,7 @@
 
     el.score.textContent = "0";
     el.streak.hidden = true;
+    updateRecordDisplays();
 
     showScreen("game");
     renderRound();
@@ -477,6 +565,17 @@
   ];
 
   function showResults() {
+    var previousBest = records.best;
+    var previousCategoryBest = Number(records.bestByCategory[state.categoryId]) || 0;
+    var newRecord = state.points > previousBest;
+    var newCategoryBest = state.points > previousCategoryBest;
+
+    records.runs += 1;
+    records.best = Math.max(records.best, state.points);
+    records.bestByCategory[state.categoryId] = Math.max(previousCategoryBest, state.points);
+    saveRecords();
+    updateRecordDisplays();
+
     el.endScore.textContent = state.points.toLocaleString("en-US");
 
     // Rank is earned by being right, not by streak luck, so it still reads the
@@ -494,6 +593,11 @@
       ? ROUND_COUNT + " of " + ROUND_COUNT + " correct. Not one wrong."
       : state.score + " of " + ROUND_COUNT + " correct" +
         (state.bestStreak >= 2 ? " · best streak " + state.bestStreak + " in a row" : "");
+    el.endRecord.classList.toggle("is-new", newRecord);
+    el.endRecordLabel.textContent = newRecord ? "New house record" : (newCategoryBest ? "New category best" : "House record");
+    el.endRecordNote.textContent = newRecord
+      ? (previousBest ? "+" + (state.points - previousBest).toLocaleString("en-US") + " over your old best" : "First score on the board")
+      : "Category best " + records.bestByCategory[state.categoryId].toLocaleString("en-US") + " pts";
     if (perfect) fireFlash();
 
     if (state.biggestShock) {
@@ -541,4 +645,6 @@
   // A click anywhere finishes the count-up too. It only ever does anything while
   // a reveal is in flight, so it can never steal a click from a control.
   document.addEventListener("click", function () { skipReveal(); }, true);
+
+  updateRecordDisplays();
 })();
