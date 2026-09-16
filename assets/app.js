@@ -127,7 +127,23 @@
     return out;
   }
 
-  function money(n) {
+  /* Cents, but only where they are the point. Every item in the first five
+     categories is a whole number of dollars, and rounding kept the reveal
+     uncluttered. Food is different: a Costco rotisserie chicken is famous for
+     being $4.99, not $5, and a Big Mac shown as $6 is not the price anybody has
+     ever paid. So an exact call prints the cents when the figure actually has
+     any, and every existing whole-dollar item is untouched.
+
+     `exact` is off by default because countUp() calls this on every frame with
+     a fractional intermediate value — printing cents there would spin two
+     jittering decimal places through the whole animation. Only the settled
+     figure asks for them. */
+  function money(n, exact) {
+    if (exact && n % 1 !== 0) {
+      return "$" + n.toLocaleString("en-US", {
+        minimumFractionDigits: 2, maximumFractionDigits: 2,
+      });
+    }
     return "$" + Math.round(n).toLocaleString("en-US");
   }
 
@@ -315,7 +331,7 @@
     function finish() {
       if (settled) return;
       settled = true;
-      node.textContent = money(target);
+      node.textContent = money(target, true);
       if (done) done();
     }
 
@@ -468,7 +484,7 @@
       var winItem = winnerItem(round);
       el.vLine.innerHTML =
         "<strong>" + winItem.brand + " " + winItem.name + "</strong> wins by " +
-        money(gap) + ".";
+        money(gap, true) + ".";
       el.vFact.textContent = round.fact || "";
 
       el.verdict.hidden = false;
@@ -491,9 +507,9 @@
       var loseIt = loserItem(round);
       announce(
         (correct ? "Correct. " : "Wrong. ") +
-        winItem.brand + " " + winItem.name + ", " + money(hi) + ", costs " +
+        winItem.brand + " " + winItem.name + ", " + money(hi, true) + ", costs " +
         formatMultiplier(ratio) + " more than " +
-        loseIt.brand + " " + loseIt.name + ", " + money(lo) + ". " +
+        loseIt.brand + " " + loseIt.name + ", " + money(lo, true) + ". " +
         (correct ? "Plus " + award + " points. " : "No points. ") +
         "Score " + state.points + ", " + state.score + " correct of " + (state.index + 1) + "."
       );
@@ -615,8 +631,8 @@
       var s = state.biggestShock;
       el.endWorst.innerHTML =
         "<h3>Biggest shock this run</h3>" +
-        "<p><b>" + s.winner.brand + " " + s.winner.name + "</b> — " + money(s.winner.price) + "</p>" +
-        "<p>beat <b>" + s.loser.brand + " " + s.loser.name + "</b> — " + money(s.loser.price) + "</p>" +
+        "<p><b>" + s.winner.brand + " " + s.winner.name + "</b> — " + money(s.winner.price, true) + "</p>" +
+        "<p>beat <b>" + s.loser.brand + " " + s.loser.name + "</b> — " + money(s.loser.price, true) + "</p>" +
         "<p style='margin-top:.6rem'>That is <b>" + formatMultiplier(s.ratio) + "</b> the price.</p>";
     } else {
       el.endWorst.innerHTML = "";

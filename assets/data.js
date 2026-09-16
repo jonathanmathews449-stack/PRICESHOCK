@@ -58,6 +58,18 @@ const CATEGORIES = [
     accent2: "#8fd0ff",
   },
   {
+    id: "food-drink",
+    name: "Food & Drink",
+    tagline: "Dinner, and the things that outprice it",
+    icon: "🍜",
+    // Pink, because every other slot was taken: red is Cars, gold is Luxury,
+    // violet is Fashion, green is Launch Prices, blue is Tech and purple is
+    // Randomized. Six cards have to be told apart at a glance from across a
+    // room, so the hues are spread deliberately rather than chosen to taste.
+    accent: "#ff5c9d",
+    accent2: "#ffc2dd",
+  },
+  {
     // Has no entry in ROUNDS on purpose. app.js builds its pool from every other
     // category at the moment you press it, so it can never drift out of sync
     // with the catalogue the way a hand-copied list would.
@@ -451,6 +463,87 @@ const ROUNDS = {
       b: { brand: "Honda", name: "Civic Si", icon: "🚗", price: 31000,
            note: "MSRP", verified: "2026-09" },
       fact: "One accelerator card, one car. The card is the cheaper of the two and it is close.",
+    },
+  ],
+
+  /* ---------------------------------------------------------- FOOD & DRINK */
+
+  /* Food is the category where the shock is cheapest to produce: everyone
+     already knows roughly what a chicken costs, so the rounds that land are the
+     ones where something edible outruns something people think of as luxury.
+     Half of these pairs are under thirty dollars on both sides on purpose —
+     a category of nothing but four-figure delicacies stops being surprising by
+     round three. */
+  "food-drink": [
+    {
+      a: { brand: "Costco", name: "Rotisserie Chicken", icon: "🍗", price: 4.99,
+           note: "held at this price since 2009", verified: "2026-09" },
+      b: { brand: "Grade A", name: "Large Eggs, dozen", icon: "🥚", price: 3.49,
+           note: "US average retail; volatile", verified: "2026-09" },
+      fact: "A cooked chicken costs a dollar fifty more than twelve uncooked eggs. Somebody else did all the work.",
+    },
+    {
+      a: { brand: "Saffron", name: "Iranian Threads, 1 gram", icon: "🌾", price: 12,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "McDonald's", name: "Big Mac", icon: "🍔", price: 5.99,
+           note: "US average", verified: "2026-09" },
+      fact: "A gram of saffron is two Big Macs. It is also about 450 hand-picked stigmas, which is the part that costs money.",
+    },
+    {
+      a: { brand: "Fiji", name: "Natural Artesian Water, 1 litre", icon: "💧", price: 2.99,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Whole Milk", name: "One US gallon", icon: "🥛", price: 4.19,
+           note: "US average retail", verified: "2026-09" },
+      fact: "Milk wins, but not by much — and a gallon is very nearly four times the volume.",
+    },
+    {
+      a: { brand: "Ichiran", name: "Tonkotsu Ramen, one bowl", icon: "🍜", price: 20,
+           note: "US restaurant price", verified: "2026-09" },
+      b: { brand: "Madagascar", name: "Vanilla Beans, two pods", icon: "🌱", price: 12,
+           note: "retail", verified: "2026-09" },
+      fact: "Two vanilla pods cost more than a main course. Vanilla is the second most expensive spice on earth and it is in everything.",
+    },
+    {
+      a: { brand: "Kopi Luwak", name: "Civet Coffee, 100 grams", icon: "☕", price: 60,
+           note: "retail", verified: "2026-09" },
+      b: { brand: "Ferrero Rocher", name: "24-piece box", icon: "🍫", price: 15,
+           note: "retail", verified: "2026-09" },
+      fact: "Four boxes of chocolates, or 100 grams of coffee that has been through a civet. Both are gifts.",
+    },
+    {
+      a: { brand: "Yubari King", name: "Melon, one fruit", icon: "🍈", price: 150,
+           note: "Japanese gift-fruit retail, not auction", verified: "2026-09" },
+      b: { brand: "Pizza Hut", name: "Large Pepperoni", icon: "🍕", price: 18,
+           note: "US retail", verified: "2026-09" },
+      fact: "One melon, eight pizzas. The melon is grown one fruit to a vine and arrives in a presentation box.",
+    },
+    {
+      a: { brand: "To'ak", name: "Ecuadorian Dark Chocolate bar", icon: "🍫", price: 300,
+           note: "retail, aged bar", verified: "2026-09" },
+      b: { brand: "Ossetra", name: "Sturgeon Caviar, 1 ounce", icon: "🥄", price: 180,
+           note: "retail, farmed", verified: "2026-09" },
+      fact: "The chocolate bar beats the caviar. It comes in a wooden box with tongs, because you are not to touch it.",
+    },
+    {
+      a: { brand: "Wagyu", name: "A5 Ribeye, 1 pound", icon: "🥩", price: 180,
+           note: "US retail, imported", verified: "2026-09" },
+      b: { brand: "Macallan", name: "18 Year Sherry Oak", icon: "🥃", price: 400,
+           note: "retail", verified: "2026-09" },
+      fact: "A bottle of whisky outruns a pound of the most marbled beef sold. The whisky spent eighteen years doing nothing.",
+    },
+    {
+      a: { brand: "Pappy Van Winkle", name: "Family Reserve 15 Year", icon: "🥃", price: 120,
+           note: "SUGGESTED RETAIL — the secondary market is roughly ten times this", verified: "2026-09" },
+      b: { brand: "Dom Pérignon", name: "Vintage 2013", icon: "🍾", price: 250,
+           note: "retail", verified: "2026-09" },
+      fact: "At the shelf price the champagne wins comfortably. At the price anybody actually pays for the bourbon, it does not.",
+    },
+    {
+      a: { brand: "Alba", name: "White Truffle, 1 ounce", icon: "🍄", price: 250,
+           note: "peak-season retail; varies enormously", verified: "2026-09" },
+      b: { brand: "Jamón Ibérico", name: "de Bellota, whole leg", icon: "🍖", price: 900,
+           note: "retail", verified: "2026-09" },
+      fact: "A whole acorn-fed leg costs three and a half ounces of truffle. The leg feeds a party; the truffle gets grated over eggs.",
     },
   ],
 };
