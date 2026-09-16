@@ -287,6 +287,10 @@
 
   <!-- ==================== SCREEN 3: RESULTS ==================== -->
   <section class="screen screen-end" id="screen-end" tabindex="-1">
+    <button class="end-close" id="btn-end-close" type="button"
+            aria-label="Close results and return to categories">
+      <span aria-hidden="true">&times;</span>
+    </button>
     <p class="end-eyebrow" id="end-eyebrow">Final score</p>
     <div class="end-score"><span id="end-score">0</span><span class="end-of">pts</span></div>
     <p class="end-tally" id="end-tally"></p>
@@ -314,14 +318,18 @@
          it can be a real dialog with a real label, and [hidden] so nothing
          inside it is focusable until it is opened. -->
     <div class="copybox" id="copybox" role="dialog" aria-modal="true"
-         aria-labelledby="copybox-title" hidden>
+         aria-labelledby="copybox-title" aria-describedby="copybox-note" hidden>
       <div class="copybox-inner">
+        <button class="copybox-x" id="copybox-x" type="button"
+                aria-label="Close copy result dialog">
+          <span aria-hidden="true">&times;</span>
+        </button>
         <h2 class="copybox-title" id="copybox-title">Copy your result</h2>
-        <p class="copybox-note">Your browser would not let the page copy for you.
+        <p class="copybox-note" id="copybox-note">Your browser would not let the page copy for you.
           The text below is selected &mdash; press Ctrl+C, or Cmd+C on a Mac.</p>
         <textarea class="copybox-text" id="copybox-text" rows="7" readonly
                   aria-label="Your result, ready to copy"></textarea>
-        <button class="btn btn-ghost" id="copybox-close" type="button">Done</button>
+        <button class="btn btn-ghost" id="copybox-close" type="button">Close</button>
       </div>
     </div>
 

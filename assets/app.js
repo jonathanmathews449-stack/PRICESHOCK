@@ -63,6 +63,7 @@
     btnBack: document.getElementById("btn-back"),
     btnAgain: document.getElementById("btn-again"),
     btnCategories: document.getElementById("btn-categories"),
+    btnEndClose: document.getElementById("btn-end-close"),
     endScore: document.getElementById("end-score"),
     endRank: document.getElementById("end-rank"),
     endBlurb: document.getElementById("end-blurb"),
@@ -79,6 +80,7 @@
     copyBox: document.getElementById("copybox"),
     copyText: document.getElementById("copybox-text"),
     copyClose: document.getElementById("copybox-close"),
+    copyX: document.getElementById("copybox-x"),
     btnSound: document.getElementById("btn-sound"),
     advanceOverlay: document.getElementById("advance-overlay"),
     soundLabel: document.getElementById("sound-label"),
@@ -266,6 +268,10 @@
     // Leaving the results screen with the manual-copy dialog still open would
     // strand an aria-modal dialog over a screen it does not belong to.
     if (el.copyBox && !el.copyBox.hidden) closeCopyBox(false);
+    // The full-viewport tap-to-advance layer belongs only to a settled game
+    // round. If round 10 leaves it up, it transparently covers the result
+    // actions and makes Play again / Share / Categories appear broken.
+    if (name !== "game") el.advanceOverlay.hidden = true;
     // A "Copied" left over from the last run must not sit under a fresh result
     // as though this one had been copied.
     setShareStatus("");
@@ -1144,6 +1150,7 @@
   el.btnNext.addEventListener("click", nextRound);
   el.btnBack.addEventListener("click", function () { showScreen("title"); });
   el.btnCategories.addEventListener("click", function () { showScreen("title"); });
+  el.btnEndClose.addEventListener("click", function () { showScreen("title"); });
   // "Play again" has to remember which kind of run it was: on a daily it must
   // re-seed today rather than fall through to startCategory("daily"), which
   // would find no such category and silently do nothing.
@@ -1160,12 +1167,22 @@
   // Wrapped, not passed by reference: the listener would hand the event object
   // to closeCopyBox as its returnFocus argument.
   el.copyClose.addEventListener("click", function () { closeCopyBox(true); });
+  el.copyX.addEventListener("click", function () { closeCopyBox(true); });
+  el.copyBox.addEventListener("click", function (e) {
+    if (e.target === el.copyBox) closeCopyBox(true);
+  });
 
   // Escape closes the manual-copy dialog. Without it the only way out is the
   // Done button, which a keyboard user reaches only after tabbing through the
   // textarea they were told to press Ctrl+C in.
   el.copyBox.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { e.stopPropagation(); closeCopyBox(true); }
+  });
+  el.screens.end.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && el.copyBox.hidden) {
+      e.stopPropagation();
+      showScreen("title");
+    }
   });
 
   // Keyboard: left/right to pick, Enter/Space to advance. Makes it playable
