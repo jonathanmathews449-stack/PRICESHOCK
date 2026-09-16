@@ -5,8 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Not found — PRICESHOCK</title>
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#16111f">
+  <meta name="theme-color" content="#1e1730">
   <meta name="robots" content="noindex">
+
+  <!-- A stray /FINAL link was seen in the wild after the share-ready build.
+       It was never the canonical Pages URL, but normalize that one known bad
+       path so an old message cannot strand somebody on the 404. Keep every
+       other missing URL here: silently redirecting arbitrary typos hides real
+       broken links. -->
+  <script>
+    var cleanPath = window.location.pathname.replace(/\/+$/, "");
+    if (cleanPath.endsWith("/FINAL")) {
+      window.location.replace(cleanPath.slice(0, -6) + "/");
+    }
+  </script>
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
 
@@ -25,10 +37,10 @@
   -->
   <style>
     :root {
-      --bg:       #08070c;
+      --bg:       #1e1730;
       --text:     #f6f4ff;
-      --muted:    #a9a3c0;
-      --faint:    #81799a;
+      --muted:    #b6afc9;
+      --faint:    #968ead;
       --accent:   #ff4d4d;
       --accent-2: #ffb03a;
       --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
