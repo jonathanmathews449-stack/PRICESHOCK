@@ -300,6 +300,96 @@ button { font: inherit; color: inherit; }
 .cat-vs { color: var(--cat); font-style: italic; }
 .cat-tag { font-size: 0.84rem; color: var(--faint); }
 
+/* --- Today's challenge ------------------------------------------------ */
+
+/* Deliberately not shaped like a category card. It sits above the grid and
+   runs horizontally, because it is a different offer: one fixed set of ten
+   that everybody gets, rather than a theme you can draw from repeatedly. */
+.daily {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  width: 100%;
+  max-width: 52rem;
+  margin-top: 2.2rem;
+  padding: 1.05rem 1.3rem;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid rgba(255, 176, 58, 0.45);
+  border-radius: var(--radius);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: transform 180ms var(--ease-out-back), border-color 180ms, background 180ms;
+}
+.daily::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, var(--accent), var(--accent-2) 85%);
+  opacity: 0.14;
+  transition: opacity 180ms;
+  pointer-events: none;
+}
+.daily > * { position: relative; }
+.daily:hover, .daily:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--accent-2);
+  background: var(--surface-2);
+}
+.daily:hover::before, .daily:focus-visible::before { opacity: 0.26; }
+
+.daily-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 14px;
+  background: linear-gradient(140deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 18px -8px var(--accent);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.daily-body { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.daily-title { font-size: 1.06rem; font-weight: 750; letter-spacing: -0.01em; }
+.daily-note { font-size: 0.82rem; color: var(--faint); }
+
+/* Pushed to the far end and set in the mono face, so it reads as a stamp on
+   the run rather than as part of the sentence above it. */
+.daily-date {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Played today. The tick is decorative — the text already says "Played", so a
+   screen reader is told the state in words and does not need the mark. */
+.daily.is-done .daily-note { color: var(--accent-2); }
+.daily.is-done .daily-icon::after {
+  content: "";
+  position: absolute;
+  transform: translate(0.95rem, -0.95rem);
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  background: var(--win);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+@media (max-width: 30rem) {
+  /* The date drops under the title rather than squeezing it: at 390px the two
+     together forced "Today's challenge" to wrap mid-word. */
+  .daily { flex-wrap: wrap; }
+  .daily-date { margin-left: 3.65rem; width: 100%; }
+}
+
 /* Shown only inside <noscript> in index.html, where the category buttons are
    hidden because nothing would happen if they were pressed. --muted on --bg
    measures 8.79:1, so it is readable as body copy rather than as fine print. */
@@ -992,6 +1082,12 @@ button { font: inherit; color: inherit; }
   .cat { background: rgba(255, 255, 255, 0.09); border-color: var(--cat); }
   .cat:hover, .cat:focus-visible { background: rgba(255, 255, 255, 0.14); }
   .cat:hover::before, .cat:focus-visible::before { opacity: 0; }
+
+  /* Same treatment for the daily: the wash goes, the border takes the house
+     accent at full strength, and the icon chip carries the colour. */
+  .daily::before, .daily:hover::before, .daily:focus-visible::before { opacity: 0; }
+  .daily { background: rgba(255, 255, 255, 0.09); border-color: var(--accent-2); }
+  .daily:hover, .daily:focus-visible { background: rgba(255, 255, 255, 0.14); }
 }
 
 /* A real photograph fills the orb. `overflow:hidden` plus the round orb does the

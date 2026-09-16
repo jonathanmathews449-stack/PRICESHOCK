@@ -29,6 +29,11 @@
   var STREAK_CAP = 5;
   var STORAGE_KEY = "priceshock-records-v1";
 
+  // House colours. The daily is not a category and should not borrow one of
+  // their six hues, or it would read as "today you are playing Fashion".
+  var DAILY_ACCENT = "#ff4d4d";
+  var DAILY_ACCENT_2 = "#ffb03a";
+
   var el = {
     screens: {
       title: document.getElementById("screen-title"),
@@ -66,6 +71,9 @@
     endTally: document.getElementById("end-tally"),
     titleBest: document.getElementById("title-best"),
     titleBestNote: document.getElementById("title-best-note"),
+    btnDaily: document.getElementById("btn-daily"),
+    dailyNote: document.getElementById("daily-note"),
+    dailyDate: document.getElementById("daily-date"),
     endRecord: document.getElementById("end-record"),
     endRecordLabel: document.getElementById("end-record-label"),
     endBest: document.getElementById("end-best"),
@@ -84,6 +92,8 @@
     locked: false,
     biggestShock: null,
     recordAtStart: 0,
+    isDaily: false,
+    dailyKey: null,
   };
 
   function loadRecords() {
@@ -93,9 +103,14 @@
         best: Number(parsed.best) || 0,
         runs: Number(parsed.runs) || 0,
         bestByCategory: parsed.bestByCategory || {},
+        // { date, best, plays } for ONE day only. Deliberately not a history:
+        // a per-day archive is what turns "no trackers, no cookies, no
+        // accounts" into a claim needing an asterisk, and nothing in the game
+        // reads further back than today.
+        daily: parsed.daily || null,
       };
     } catch (err) {
-      return { best: 0, runs: 0, bestByCategory: {} };
+      return { best: 0, runs: 0, bestByCategory: {}, daily: null };
     }
   }
 
@@ -106,6 +121,35 @@
     catch (err) { /* Private browsing can deny storage; the game still works. */ }
   }
 
+  /* Today only. A stored daily from an earlier date is not "your result" for
+     this board — it was played on a different ten — so it is treated as absent
+     rather than displayed against rounds it never belonged to. */
+  function todaysDaily() {
+    var d = records.daily;
+    return (d && d.date === dailyKey()) ? d : null;
+  }
+
+  function updateDailyDisplay() {
+    if (!el.btnDaily) return;
+    var today = todaysDaily();
+    // Formatted in UTC to match the seed. Showing a local date beside a board
+    // chosen by the UTC one would put the wrong day on the button for anyone
+    // far enough east or west.
+    el.dailyDate.textContent = new Date().toLocaleDateString("en-US", {
+      month: "short", day: "numeric", timeZone: "UTC",
+    });
+    if (today) {
+      el.dailyNote.textContent = "Played — " +
+        today.best.toLocaleString("en-US") + " pts" +
+        (today.plays > 1 ? ", best of " + today.plays : "") + " · play again";
+      el.btnDaily.classList.add("is-done");
+    } else {
+      el.dailyNote.textContent = "Same ten rounds for everyone";
+      el.btnDaily.classList.remove("is-done");
+    }
+  }
+
+
   function updateRecordDisplays() {
     var formatted = records.best.toLocaleString("en-US");
     el.titleBest.textContent = formatted;
@@ -114,14 +158,61 @@
     el.titleBestNote.textContent = records.runs
       ? records.runs + (records.runs === 1 ? " run played" : " runs played")
       : "Set the first record";
+    updateDailyDisplay();
+  }
+
+  /* ----------------------------------------------------- the daily seed */
+
+  /* Everyone who plays on a given UTC day gets the same ten rounds, in the
+     same order, with the same item on the same side. That needs a generator
+     the page can drive itself — Math.random cannot be seeded — and it needs to
+     stay a static site: no server, no request, nothing stored that identifies
+     anybody. A date string is the only input.
+
+     UTC, not local time. On local time two players either side of midnight
+     would disagree about which day it is and get different boards while both
+     believed they were comparing the same one. UTC is wrong for everybody by
+     the same amount, which is the property that matters. */
+  function dailyKey(now) {
+    var d = now || new Date();
+    return d.getUTCFullYear() + "-" +
+      String(d.getUTCMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getUTCDate()).padStart(2, "0");
+  }
+
+  // xmur3 to turn the date string into a 32-bit seed, mulberry32 to turn that
+  // seed into a stream. Both are small, well-known and — the point here —
+  // produce identical output from identical input in every browser, which a
+  // hash built out of Math.random or Date.now would not.
+  function seedFrom(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    return (Math.imul(h ^ (h >>> 16), 2246822507) ^
+            Math.imul(h ^ (h >>> 13), 3266489909)) >>> 0;
+  }
+
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
   }
 
   /* ---------------------------------------------------------- utilities */
 
-  function shuffle(arr) {
+  // `rand` is injectable so the daily can pass a seeded stream. Everything else
+  // passes nothing and gets Math.random, which is what a normal run wants.
+  function shuffle(arr, rand) {
+    var rng = rand || Math.random;
     var out = arr.slice();
     for (var i = out.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
+      var j = Math.floor(rng() * (i + 1));
       var t = out[i]; out[i] = out[j]; out[j] = t;
     }
     return out;
@@ -548,14 +639,16 @@
     return pool;
   }
 
-  function startCategory(id) {
-    var cat = CATEGORIES.filter(function (c) { return c.id === id; })[0];
-    if (!cat) return;
+  /* One run setup, two ways in. `rand` decides everything that varies between
+     runs — which ten pairs, their order, and which side each item lands on —
+     so passing a seeded stream is the whole of what makes a daily a daily. */
+  function beginRun(opts) {
+    var pool = opts.pool;
+    var rand = opts.rand || Math.random;
 
-    document.documentElement.style.setProperty("--accent", cat.accent);
-    document.documentElement.style.setProperty("--accent-2", cat.accent2);
-
-    state.categoryId = id;
+    state.categoryId = opts.categoryId;
+    state.isDaily = !!opts.isDaily;
+    state.dailyKey = opts.dailyKey || null;
     state.index = 0;
     state.score = 0;
     state.points = 0;
@@ -565,8 +658,8 @@
     state.recordAtStart = records.best;
 
     // Randomise which side each item lands on, so position carries no signal.
-    state.rounds = shuffle(poolFor(id)).slice(0, ROUND_COUNT).map(function (r) {
-      var flip = Math.random() < 0.5;
+    state.rounds = shuffle(pool, rand).slice(0, ROUND_COUNT).map(function (r) {
+      var flip = rand() < 0.5;
       return {
         left: flip ? r.b : r.a,
         right: flip ? r.a : r.b,
@@ -580,6 +673,40 @@
 
     showScreen("game");
     renderRound();
+  }
+
+  function startCategory(id) {
+    var cat = CATEGORIES.filter(function (c) { return c.id === id; })[0];
+    if (!cat) return;
+
+    document.documentElement.style.setProperty("--accent", cat.accent);
+    document.documentElement.style.setProperty("--accent-2", cat.accent2);
+
+    beginRun({ categoryId: id, pool: poolFor(id) });
+  }
+
+  /* The daily draws from every category, like Randomized, but from a seeded
+     stream instead of Math.random. Two consequences worth stating:
+
+       * It is only stable as long as data.js is. Adding a pair changes the
+         pool and therefore changes today's board mid-day for anyone who
+         reloads after the deploy. That is accepted — the alternative is
+         freezing a copy of the catalogue, which would rot.
+       * `poolFor("random")` walks Object.keys(ROUNDS), whose order is the
+         source order of the file and identical for every player loading the
+         same deploy. If that ever stopped being true the daily would quietly
+         differ between browsers, so do not sort or filter it here. */
+  function startDaily() {
+    var key = dailyKey();
+    document.documentElement.style.setProperty("--accent", DAILY_ACCENT);
+    document.documentElement.style.setProperty("--accent-2", DAILY_ACCENT_2);
+    beginRun({
+      categoryId: "daily",
+      isDaily: true,
+      dailyKey: key,
+      pool: poolFor("random"),
+      rand: mulberry32(seedFrom("priceshock-daily-" + key)),
+    });
   }
 
   function nextRound() {
@@ -608,7 +735,28 @@
 
     records.runs += 1;
     records.best = Math.max(records.best, state.points);
-    records.bestByCategory[state.categoryId] = Math.max(previousCategoryBest, state.points);
+
+    /* The daily records apart from the category bests. It is not one of the
+       six, and writing it into bestByCategory would put a seventh row into a
+       structure the category-best line reads from and show "Category best" on
+       a screen that never mentioned a category.
+
+       A replay keeps the higher of the two rather than the latest. The board
+       is fixed for the day, so the first honest attempt and a fourth informed
+       one are not the same achievement — but nothing here can tell them apart,
+       and quietly overwriting a good score with a worse one is the more
+       annoying of the two ways to be wrong. `plays` makes the replay visible
+       instead of hiding it. */
+    if (state.isDaily) {
+      var prior = todaysDaily();
+      records.daily = {
+        date: state.dailyKey,
+        best: Math.max(prior ? prior.best : 0, state.points),
+        plays: (prior ? prior.plays : 0) + 1,
+      };
+    } else {
+      records.bestByCategory[state.categoryId] = Math.max(previousCategoryBest, state.points);
+    }
     saveRecords();
     updateRecordDisplays();
 
@@ -630,10 +778,21 @@
       : state.score + " of " + ROUND_COUNT + " correct" +
         (state.bestStreak >= 2 ? " · best streak " + state.bestStreak + " in a row" : "");
     el.endRecord.classList.toggle("is-new", newRecord);
-    el.endRecordLabel.textContent = newRecord ? "New house record" : (newCategoryBest ? "New category best" : "House record");
-    el.endRecordNote.textContent = newRecord
-      ? (previousBest ? "+" + (state.points - previousBest).toLocaleString("en-US") + " over your old best" : "First score on the board")
-      : "Category best " + records.bestByCategory[state.categoryId].toLocaleString("en-US") + " pts";
+    /* The daily has no category, so neither the label nor the note may reach
+       into bestByCategory — before this branch existed that line read
+       `undefined.toLocaleString()` and threw on the results screen. */
+    if (state.isDaily) {
+      var todayBest = todaysDaily();
+      el.endRecordLabel.textContent = newRecord ? "New house record" : "Today’s challenge";
+      el.endRecordNote.textContent = newRecord
+        ? (previousBest ? "+" + (state.points - previousBest).toLocaleString("en-US") + " over your old best" : "First score on the board")
+        : "Best today " + (todayBest ? todayBest.best.toLocaleString("en-US") : "0") + " pts";
+    } else {
+      el.endRecordLabel.textContent = newRecord ? "New house record" : (newCategoryBest ? "New category best" : "House record");
+      el.endRecordNote.textContent = newRecord
+        ? (previousBest ? "+" + (state.points - previousBest).toLocaleString("en-US") + " over your old best" : "First score on the board")
+        : "Category best " + records.bestByCategory[state.categoryId].toLocaleString("en-US") + " pts";
+    }
     if (perfect) fireFlash();
 
     if (state.biggestShock) {
@@ -681,7 +840,13 @@
   el.btnNext.addEventListener("click", nextRound);
   el.btnBack.addEventListener("click", function () { showScreen("title"); });
   el.btnCategories.addEventListener("click", function () { showScreen("title"); });
-  el.btnAgain.addEventListener("click", function () { startCategory(state.categoryId); });
+  // "Play again" has to remember which kind of run it was: on a daily it must
+  // re-seed today rather than fall through to startCategory("daily"), which
+  // would find no such category and silently do nothing.
+  el.btnAgain.addEventListener("click", function () {
+    if (state.isDaily) startDaily(); else startCategory(state.categoryId);
+  });
+  el.btnDaily.addEventListener("click", startDaily);
 
   // Keyboard: left/right to pick, Enter/Space to advance. Makes it playable
   // without a mouse and is genuinely faster.

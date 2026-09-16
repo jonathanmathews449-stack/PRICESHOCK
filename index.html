@@ -106,6 +106,19 @@
       <span class="record-note" id="title-best-note">Set the first record</span>
     </div>
 
+    <!-- The daily sits above the grid, not inside it. It is not a category:
+         it is one fixed set of ten for today that every player gets in the
+         same order, so putting it in the grid would imply you could pick it
+         the way you pick Luxury and get a different ten each time. -->
+    <button class="daily" type="button" id="btn-daily">
+      <span class="daily-icon" aria-hidden="true">📅</span>
+      <span class="daily-body">
+        <span class="daily-title">Today&rsquo;s challenge</span>
+        <span class="daily-note" id="daily-note">Same ten rounds for everyone</span>
+      </span>
+      <span class="daily-date" id="daily-date"></span>
+    </button>
+
     <!-- role="group", not role="list". An explicit ARIA role REPLACES the
          implicit one, so role="listitem" on these buttons meant a screen
          reader announced the category buttons as list items and never said
@@ -163,7 +176,7 @@
     -->
     <noscript>
       <style>
-        .cat-grid, .hint { display: none; }
+        .cat-grid, .hint, .daily { display: none; }
       </style>
       <p class="noscript-note">
         PRICESHOCK is a game, and the rounds run in your browser — so it needs
