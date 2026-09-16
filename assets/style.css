@@ -310,12 +310,13 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.95rem;
   width: 100%;
   max-width: 52rem;
   margin-top: 2.2rem;
   padding: 1.05rem 1.3rem;
-  text-align: left;
+  text-align: center;
   background: var(--surface);
   border: 1px solid rgba(255, 176, 58, 0.45);
   border-radius: var(--radius);
@@ -353,14 +354,15 @@ button { font: inherit; color: inherit; }
   font-size: 1.35rem;
   line-height: 1;
 }
-.daily-body { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.daily-body { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; min-width: 0; }
 .daily-title { font-size: 1.06rem; font-weight: 750; letter-spacing: -0.01em; }
 .daily-note { font-size: 0.82rem; color: var(--faint); }
 
-/* Pushed to the far end and set in the mono face, so it reads as a stamp on
-   the run rather than as part of the sentence above it. */
+/* Set in the mono face so it reads as a stamp on the run rather than as part
+   of the sentence beside it. It used to be pushed to the far right with
+   margin-left:auto, which anchored the row to both edges and left the text
+   drifting left of centre in a full-width card; it now trails the cluster. */
 .daily-date {
-  margin-left: auto;
   flex: none;
   font-family: var(--mono);
   font-size: 0.74rem;
@@ -384,10 +386,13 @@ button { font: inherit; color: inherit; }
 }
 
 @media (max-width: 30rem) {
-  /* The date drops under the title rather than squeezing it: at 390px the two
-     together forced "Today's challenge" to wrap mid-word. */
-  .daily { flex-wrap: wrap; }
-  .daily-date { margin-left: 3.65rem; width: 100%; }
+  /* Stacks below 30rem. Side by side at 390px the two lines forced "Today's
+     challenge" to wrap mid-word, and centring the row still left the icon
+     hanging off the left with the text centred in whatever space remained —
+     which is not symmetry, it just looks like a mistake made carefully. As a
+     column every part shares one centre line, the same as the Randomized card
+     directly below it. */
+  .daily { flex-direction: column; gap: 0.55rem; }
 }
 
 /* Shown only inside <noscript> in index.html, where the category buttons are
@@ -1141,7 +1146,15 @@ button { font: inherit; color: inherit; }
 
 /* Randomized spans the row it lands on: it is not one of the themed categories,
    it is the way in when you do not want to choose. */
-.cat-wide { grid-column: 1 / -1; }
+/* Randomized spans its row, so left-aligned content left a wide empty half and
+   read as though the card had lost something. The other six sit in a column of
+   three and share their left edge with each other; this one shares its edge
+   with nothing, so it centres instead. */
+.cat-wide {
+  grid-column: 1 / -1;
+  align-items: center;
+  text-align: center;
+}
 
 /* --- A perfect run --------------------------------------------------- */
 
