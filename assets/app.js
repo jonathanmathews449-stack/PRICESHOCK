@@ -80,6 +80,7 @@
     copyText: document.getElementById("copybox-text"),
     copyClose: document.getElementById("copybox-close"),
     btnSound: document.getElementById("btn-sound"),
+    advanceOverlay: document.getElementById("advance-overlay"),
     soundLabel: document.getElementById("sound-label"),
     endRecord: document.getElementById("end-record"),
     endRecordLabel: document.getElementById("end-record-label"),
@@ -315,6 +316,8 @@
     var roundNumber = state.index + 1;
     var doubleDrop = roundNumber === 5 || roundNumber === 10;
 
+    el.advanceOverlay.hidden = true;
+
     [el.cardA, el.cardB].forEach(function (card) {
       card.className = "card";
       card.disabled = false;
@@ -449,6 +452,13 @@
     function finish() {
       if (settled) return;
       settled = true;
+      // Drop out of the pending list. Without this a finisher that completed on
+      // its own stayed in the array, so skipReveal() found a non-empty list,
+      // ran two no-ops and still reported TRUE — and every caller reads that as
+      // "the tap was spent skipping". The visible symptom was that the first
+      // Space or tap after a reveal had finished did nothing at all.
+      var at = pendingFinishers.indexOf(finish);
+      if (at !== -1) pendingFinishers.splice(at, 1);
       node.textContent = money(target, true);
       if (done) done();
     }
@@ -661,6 +671,10 @@
       // in-flight polite announcement, so the move happens first and the
       // outcome is spoken after it.
       el.btnNext.focus();
+
+      // The tap-to-advance layer goes up only now, when advancing is the only
+      // thing left to do in this round.
+      el.advanceOverlay.hidden = false;
 
       var loseIt = loserItem(round);
       announce(
@@ -1172,6 +1186,22 @@
   // A click anywhere finishes the count-up too. It only ever does anything while
   // a reveal is in flight, so it can never steal a click from a control.
   document.addEventListener("click", function () { skipReveal(); }, true);
+
+  /* Tap anywhere to advance, once the reveal has settled.
+
+     Done with a real overlay rather than a document-level click handler that
+     tries to work out whether the tap "meant" something else. That approach
+     needs the handler to reason about capture order, disabled buttons that
+     swallow their own clicks, and the card listeners firing for the NEXT round
+     on the same tap that left the previous one. An element that exists only
+     while advancing is the correct action has none of those questions: if the
+     tap reached it, advancing is what the tap meant.
+
+     It sits at z-index 5, under the HUD and the verdict (z-index 10) so Back
+     and "Next round" still receive their own clicks, and under the sound
+     toggle at 40. What it does cover is the two cards, which are the largest
+     thing on a phone screen and exactly what a thumb lands on. */
+  el.advanceOverlay.addEventListener("click", nextRound);
 
   updateRecordDisplays();
 })();

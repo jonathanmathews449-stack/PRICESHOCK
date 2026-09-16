@@ -101,6 +101,16 @@
 </button>
 
 
+<!-- Tap-to-advance layer. Hidden until the reveal settles; see settle() in
+     app.js. aria-hidden because "Next round" already exists as a real,
+     focusable control saying the same thing — this is a convenience for a
+     thumb, not a second announcement.
+
+     A direct child of <body>, NOT of .screen-game: the screens animate in with
+     a transform, and a transformed ancestor becomes the containing block for
+     position:fixed, which collapsed this to 0x0. -->
+<div class="advance-overlay" id="advance-overlay" aria-hidden="true" hidden></div>
+
 <!-- Flash layer for the reveal. Purely decorative. -->
 <div class="flash" id="flash" aria-hidden="true"></div>
 
@@ -113,10 +123,15 @@
 
   <!-- ==================== SCREEN 1: TITLE ==================== -->
   <section class="screen screen-title is-active" id="screen-title" tabindex="-1">
-    <h1 class="logo">
-      <span class="logo-price">PRICE</span><span class="logo-shock">SHOCK</span>
+    <!-- aria-label carries the real name. The visible text is "PRICE$HOCK",
+         which a screen reader would otherwise announce as "price dollar hock" —
+         so the spans are hidden from the accessibility tree and the heading
+         supplies "PRICESHOCK" itself. -->
+    <h1 class="logo" aria-label="PRICESHOCK">
+      <span class="logo-price" aria-hidden="true">PRICE</span><span class="logo-shock" aria-hidden="true"><span class="logo-dollar">$</span>HOCK</span>
     </h1>
     <p class="tagline">Two things. One costs more.<br><em>You have no idea which.</em></p>
+    <p class="byline">by Teddington</p>
 
     <div class="record-panel" aria-label="Your all-time high score">
       <span class="record-kicker">House record</span>
@@ -264,6 +279,9 @@
       <p class="verdict-line" id="verdict-line"></p>
       <p class="verdict-fact" id="verdict-fact"></p>
       <button class="btn btn-next" id="btn-next" type="button">Next round →</button>
+      <!-- Says what the tap handler in app.js already does, because an
+           invisible shortcut helps nobody who does not know it is there. -->
+      <p class="tap-hint">or tap anywhere</p>
     </div>
   </section>
 
@@ -313,12 +331,20 @@
 </main>
 
 <footer class="site-footer">
-  <p>
-    Prices are approximate US retail in USD, checked September 2026, and drift constantly.
-    Auction, resale and historical launch figures are labelled as such — launch prices are
-    in the dollars of their own year, not adjusted for inflation. For entertainment — not a
-    valuation.
-  </p>
+  <!-- The always-visible line carries the two claims that actually matter: the
+       figures are approximate, and this is not a valuation. The rest is true
+       and worth keeping, but on a 390px screen it ran to five lines and took
+       most of the fold under the category grid, which is a lot of screen for
+       small print. <details> keeps every word without spending the space, and
+       needs no script to open. -->
+  <p class="disclaimer">Approximate US retail in USD, checked September&nbsp;2026.
+    For entertainment &mdash; not a valuation.</p>
+  <details class="disclaimer-more">
+    <summary>How the prices work</summary>
+    <p>Prices drift constantly. Auction, resale and historical launch figures
+      are labelled as such on the card &mdash; launch prices are in the dollars
+      of their own year, not adjusted for inflation.</p>
+  </details>
   <p class="footer-meta">PRICESHOCK · no trackers, no cookies, no accounts · <a href="credits.html">photo credits</a></p>
 </footer>
 
